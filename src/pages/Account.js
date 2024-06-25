@@ -8,12 +8,21 @@ import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+
+const affiliations = [
+  'Full Gospel Las Vegas Church',
+];
 
 export default function Account({ session }) {
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState(null);
   const [social, setSocial] = useState(null);
   const [avatar_url, setAvatarUrl] = useState(null);
+  const [affiliation, setAffiliation] = useState('');
 
   useEffect(() => {
     let ignore = false;
@@ -23,7 +32,7 @@ export default function Account({ session }) {
 
       const { data, error } = await supabase
         .from('profiles')
-        .select(`username, social, avatar_url`)
+        .select(`username, social, avatar_url, affiliation`)
         .eq('id', user.id)
         .single();
 
@@ -34,6 +43,7 @@ export default function Account({ session }) {
           setUsername(data.username);
           setSocial(data.social);
           setAvatarUrl(data.avatar_url);
+	  setAffiliation(data.affiliation);
         }
       }
 
@@ -59,6 +69,7 @@ export default function Account({ session }) {
       social,
       avatar_url: avatarUrl,
       updated_at: new Date(),
+      affiliation,
     };
 
     const { error } = await supabase.from('profiles').upsert(updates);
@@ -70,6 +81,10 @@ export default function Account({ session }) {
     }
     setLoading(false);
   }
+  
+  const handleChange = (event) => {
+    setAffiliation(event.target.value);
+  };
 
   return (
     <div className="App">
@@ -121,20 +136,22 @@ export default function Account({ session }) {
                   },
                 }}
               />
-              <TextField
-                margin="normal"
-                fullWidth
-                id="affiliation"
-                label="Affiliation"
-                name="Affiliation"
-                autoComplete="affiliation"
-                color="primary"
-                InputProps={{
-                  style: {
-                    backgroundColor: 'white',
-                  },
-                }}
-              />
+      	      <FormControl sx={{ m: 1, width: 300 }}>
+        	<InputLabel>Affiliation</InputLabel>
+        	<Select
+          	  value={affiliation}
+          	  onChange={handleChange}
+        	>
+          	  {affiliations.map((affiliation) => (
+            	    <MenuItem
+              	      key={affiliation}
+              	      value={affiliation}
+            	    >
+              	      {affiliation}
+            	    </MenuItem>
+          	  ))}
+           	</Select>
+      	      </FormControl>
               <TextField
                 margin="normal"
                 fullWidth
@@ -172,14 +189,6 @@ export default function Account({ session }) {
               >
                 {loading ? 'Loading...' : 'Update Profile'}
               </Button>
-              <Button
-                fullWidth
-                variant="contained"
-                sx={{ mt: 1, mb: 2 }}
-                onClick={() => supabase.auth.signOut()}
-              >
-                Sign Out
-              </Button>
             </Box>
           </Box>
         </Container>
@@ -187,3 +196,4 @@ export default function Account({ session }) {
     </div>
   );
 }
+
