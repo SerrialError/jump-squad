@@ -3,7 +3,6 @@ import * as ReactRouter from "react-router-dom";
 import supabase from '../components/Supabase';
 import Avatar from "@mui/material/Avatar";
 import Divider from "@mui/material/Divider";
-import Stack from "@mui/material/Stack";
 import Button from "@mui/material/Button";
 import Popover from "@mui/material/Popover";
 import List from "@mui/material/List";
@@ -78,23 +77,18 @@ const AvatarFunc = () => {
 
 
   const avatarPopoverOpen = Boolean(avatarEl);
-  const avatarPopoverId = avatarPopoverOpen ? "simple-popover" : undefined;
-
 
   return (
     <div>
-      <Stack direction="row" spacing={1}>
-        <Button aria-describedby={avatarPopoverId} onClick={handleAvatarClick}>
+        <Button variant="light" onClick={handleAvatarClick}>
           {userData ? (
             <Avatar alt={userData.user_metadata?.full_name || 'User'} src={userData || ''} />
           ) : (
             <AccountCircleIcon />
           )}
         </Button>
-      </Stack>
 
       <Popover
-        id={avatarPopoverId}
         open={avatarPopoverOpen}
         anchorEl={avatarEl}
         onClose={handleAvatarClose}
