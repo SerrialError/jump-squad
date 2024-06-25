@@ -11,9 +11,41 @@ import village from '../images/opportunity-village.png';
 import project150 from '../images/project150.png';
 import lvrm from '../images/lvrm.png';
 import goodieshoes from '../images/goodie-two-shoes.png';
+import supabase from '../components/Supabase';
 import '../App.css';
 
 function Dashboard() {
+  const [affiliation, setAffiliation] = React.useState(null);
+  const [error, setError] = React.useState(null);
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    async function fetchAffiliations() {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) {
+        setError('Please sign in to view Leaderboard');
+        setLoading(false);
+        return;
+      }
+
+      const { data: affData, error: affError } = await supabase
+        .from('profiles')
+        .select('affiliation')
+        .eq('id', user.id)
+        .single();
+
+      if (affError) {
+        console.warn(affError);
+      } else if (affData) {
+        setAffiliation(affData.affiliation);
+      }
+
+      setLoading(false);
+    }
+
+    fetchAffiliations();
+  }, []);
+
   const carouselItems = [
     {
       image: village,
@@ -92,6 +124,13 @@ function Dashboard() {
               </Grid>
             ))}
           </Grid>
+        </div>
+        <div style={{ marginTop: '20px' }}>
+          {affiliation === "Full Gospel Las Vegas Church" && (
+            <Typography variant="h4" component="h2" align="center" gutterBottom>
+              Full Gospel Church
+            </Typography>
+          )}
         </div>
       </header>
     </div>
