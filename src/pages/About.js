@@ -1,6 +1,7 @@
 import '../App.css';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
+import fglv from '../images/fglv.png';
 
 function About() {
   return (
@@ -83,6 +84,10 @@ function About() {
         <p>
           For more information about our upcoming events, volunteer opportunities, or to donate, please contact us at [we need to create email] or visit our website at jumpsquad.com. Follow us on social media [links to social media profiles] to stay updated on our latest projects and activities.
         </p>
+        <h1>Some of our Affiliates</h1>
+        <a href="https://www.fglvchurch.com/">
+          <img src={fglv} alt="Full Gospel Church Las Vegas" height="100px"/>
+        </a>    
       </Box>
     </Container>
   );

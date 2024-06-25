@@ -136,22 +136,29 @@ export default function Account({ session }) {
                   },
                 }}
               />
-      	      <FormControl sx={{ m: 1, width: 300 }}>
-        	<InputLabel>Affiliation</InputLabel>
-        	<Select
-          	  value={affiliation}
-          	  onChange={handleChange}
-        	>
-          	  {affiliations.map((affiliation) => (
-            	    <MenuItem
-              	      key={affiliation}
-              	      value={affiliation}
-            	    >
-              	      {affiliation}
-            	    </MenuItem>
-          	  ))}
-           	</Select>
-      	      </FormControl>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                id="affiliation"
+                label="Affiliation"
+                name="affiliation"
+                select
+                value={affiliation}
+                onChange={handleChange}
+                color="primary"
+                InputProps={{
+                  style: {
+                    backgroundColor: 'white',
+                  },
+                }}
+              >
+                {affiliations.map((affiliation) => (
+                  <MenuItem key={affiliation} value={affiliation}>
+                    {affiliation}
+                  </MenuItem>
+                ))}
+              </TextField>
               <TextField
                 margin="normal"
                 fullWidth

@@ -37,6 +37,7 @@ import About from "./About";
 import Signup from "./Signup";
 import Goals from "./Goals";
 import Directory from "./Directory";
+//import PublicProfile from "./PublicProfile"
 import supabase from '../components/Supabase';
 import Avatar from '../components/Avatar';
 
@@ -149,6 +150,8 @@ function Navbar() {
         return "Goals";
       case "/Directory":
         return "Directory";
+      case "/PublicProfile":
+        return "Public Profile";
       default:
         return "Retrieving title failed";
     }

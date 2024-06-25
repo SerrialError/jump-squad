@@ -114,11 +114,15 @@ const AvatarFunc = () => {
             </ListItemButton>
           </ListItem>
           {userData && (
-            <ListItem disablePadding>
-              <ListItemButton onClick={() => supabase.auth.signOut()}>
-                <ListItemText primary="Sign Out" />
+            <><ListItem disablePadding>
+              <ListItemButton onClick={() => navigate("/PublicProfile")}>
+                <ListItemText primary="Public Profile" />
               </ListItemButton>
-            </ListItem>
+            </ListItem><Divider /><ListItem disablePadding>
+                <ListItemButton onClick={() => supabase.auth.signOut()}>
+                  <ListItemText primary="Sign Out" />
+                </ListItemButton>
+              </ListItem></>
           )}
         </List>
       </Popover>

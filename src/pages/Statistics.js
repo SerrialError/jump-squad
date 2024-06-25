@@ -45,7 +45,7 @@ const LeaderboardAndStatistics = () => {
     async function fetchUserData() {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) {
-        setError('Please sign in to view Leaderboard');
+        setError('Please sign in to view Statistics');
         setLoading(false);
         return;
       }
