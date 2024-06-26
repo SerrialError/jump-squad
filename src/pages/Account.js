@@ -15,6 +15,7 @@ import Select from '@mui/material/Select';
 
 const affiliations = [
   'Full Gospel Las Vegas Church',
+  'No Affiliation',
 ];
 
 export default function Account({ session }) {
@@ -22,7 +23,7 @@ export default function Account({ session }) {
   const [username, setUsername] = useState(null);
   const [social, setSocial] = useState(null);
   const [avatar_url, setAvatarUrl] = useState(null);
-  const [affiliation, setAffiliation] = useState('');
+  const [affiliation, setAffiliation] = useState('No Affiliation');
 
   useEffect(() => {
     let ignore = false;

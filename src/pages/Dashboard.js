@@ -12,6 +12,7 @@ import project150 from '../images/project150.png';
 import lvrm from '../images/lvrm.png';
 import goodieshoes from '../images/goodie-two-shoes.png';
 import supabase from '../components/Supabase';
+import fglv from '../images/fglv.png';
 import '../App.css';
 
 function Dashboard() {
@@ -127,9 +128,45 @@ function Dashboard() {
         </div>
         <div style={{ marginTop: '20px' }}>
           {affiliation === "Full Gospel Las Vegas Church" && (
-            <Typography variant="h4" component="h2" align="center" gutterBottom>
-              Full Gospel Church
-            </Typography>
+            <>
+              <Typography variant="h4" component="h2" align="center" gutterBottom>
+                Full Gospel Church
+              </Typography>
+              <Grid container spacing={3}>
+                {[
+                  { name: 'Fireworks Displays', link: 'https://fglvchurch.com', description: 'Firework displays all day at 9415 W Tropicana Ave, Las Vegas, NV 89147.', image: fglv },
+                ].map((item, index) => (
+                  <Grid item xs={12} sm={6} md={3} key={index}>
+                    <Card className="card">
+                      <CardContent>
+                        <Grid container spacing={2} alignItems="center">
+                          <Grid item xs={8}>
+                            <Typography gutterBottom variant="h5" component="div" align="center">
+                              <Link href={item.link} target="_blank" rel="noopener noreferrer" color="textPrimary" underline="hover" className="App-Link">
+                                {item.name}
+                              </Link>
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={4}>
+                            <CardMedia
+                              className="img-dashboard-table"
+                              component="img"
+                              height="60"
+                              image={item.image}
+                              alt={item.name}
+                            />
+                          </Grid>
+                        </Grid>
+                        <Typography color="textSecondary" className="card-content" variant="body2" component="p">
+                          {item.description}
+                        </Typography>
+                      </CardContent>
+                      <Divider />
+                    </Card>
+                  </Grid>
+                ))}
+              </Grid>
+            </>
           )}
         </div>
       </header>

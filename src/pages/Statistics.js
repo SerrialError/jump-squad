@@ -8,6 +8,7 @@ import supabase from '../components/Supabase';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
+import { axiosInstance } from '../components/axios';
 import '../App.css';
 
 function createData(month, hours) {
@@ -40,6 +41,7 @@ const LeaderboardAndStatistics = () => {
   const [loading, setLoading] = useState(true);
   const [form_url, setFormUrl] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [responseData, setResponseData] = useState(null); // Update type accordingly
 
   useEffect(() => {
     async function fetchUserData() {
@@ -94,6 +96,14 @@ const LeaderboardAndStatistics = () => {
       }
 
       setLoading(false);
+      const response = await axiosInstance.get('api/v1/hello');
+      setResponseData(response.data.data);
+      if (error) {
+        console.error('Error fetching data:', error);
+      }
+      else {
+	console.log(responseData);
+      }	  
     }
 
     async function fetchStatistics() {
@@ -124,7 +134,7 @@ const LeaderboardAndStatistics = () => {
 
     fetchUserData();
     fetchStatistics();
-  }, []);
+  }, [responseData]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
