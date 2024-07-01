@@ -13,16 +13,19 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.get("/api/v1/hello", (req, res) => {
+    console.log("hello");
     res.send('Hello from the backend!');
 });
 
-app.get("/api/v1/sendemail", async (req, res) => {
+app.post("/api/v1/sendemail", async (req, res) => {
+  const { uuid } = req.body;
+  console.log(uuid);
   try {
     const { data, error } = await resend.emails.send({
-      from: "Acme <onboarding@resend.dev>",
+      from: "Acme <user@resend.dev>",
       to: ["serrialerror@outlook.com"],
       subject: "hello world",
-      html: "<strong>it works!</strong>",
+      html: `<strong>it works, ${uuid}</strong>`,
     });
 
     if (error) {
