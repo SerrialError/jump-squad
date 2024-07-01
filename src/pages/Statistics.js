@@ -5,8 +5,6 @@ import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import HourSubmission from '../components/HourSubmission';
 import supabase from '../components/Supabase';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 import { axiosInstance } from '../components/axios';
 import '../App.css';
@@ -36,24 +34,21 @@ const LeaderboardAndStatistics = () => {
   const [statistics, setStatistics] = useState([]);
   const [data, setData] = useState(initialData);
   const [id, setUserId] = useState(null);
-  const [name, setName] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [form_url, setFormUrl] = useState(null);
-  const [anchorEl, setAnchorEl] = useState(null);
   const [responseData, setResponseData] = useState(null); // Update type accordingly
 
   useEffect(() => {
     async function fetchUserData() {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) {
-        setError('Please sign in to view Statistics');
+        setError('Please sign in to view Statistics and submit hours');
         setLoading(false);
         return;
       }
 
       setUserId(user.id);
-      setName(user.user_metadata.name);
 
       const { data: tableData, error: tableError } = await supabase
         .from('Statistics')
@@ -96,14 +91,6 @@ const LeaderboardAndStatistics = () => {
       }
 
       setLoading(false);
-      const response = await axiosInstance.get('api/v1/hello');
-      setResponseData(response.data.data);
-      if (error) {
-        console.error('Error fetching data:', error);
-      }
-      else {
-	console.log(responseData);
-      }	  
     }
 
     async function fetchStatistics() {
@@ -136,75 +123,6 @@ const LeaderboardAndStatistics = () => {
     fetchStatistics();
   }, [responseData]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    const record = {
-      January: data.find(month => month.month === 'January').hours,
-      February: data.find(month => month.month === 'February').hours,
-      March: data.find(month => month.month === 'March').hours,
-      April: data.find(month => month.month === 'April').hours,
-      May: data.find(month => month.month === 'May').hours,
-      June: data.find(month => month.month === 'June').hours,
-      July: data.find(month => month.month === 'July').hours,
-      August: data.find(month => month.month === 'August').hours,
-      September: data.find(month => month.month === 'September').hours,
-      October: data.find(month => month.month === 'October').hours,
-      November: data.find(month => month.month === 'November').hours,
-      December: data.find(month => month.month === 'December').hours,
-      id,
-      Name: name,
-    };
-
-    const { data: tableData, error: tableError } = await supabase
-      .from('Statistics')
-      .select()
-      .eq('id', id);
-
-    if (tableError) {
-      console.log(tableError);
-      return;
-    }
-
-    if (!tableData || tableData.length === 0) {
-      const { error } = await supabase
-        .from('Statistics')
-        .insert([record]);
-
-      if (error) {
-        console.log(error);
-        return;
-      }
-      console.log("Inserting data");
-    } else {
-      const { error } = await supabase
-        .from('Statistics')
-        .update(record)
-        .eq('id', id);
-
-      if (error) {
-        console.log(error);
-        return;
-      }
-      console.log("Updating data");
-    }
-
-    setData([
-      { month: 'January', hours: Number(record.January) || 0 },
-      { month: 'February', hours: Number(record.February) || 0 },
-      { month: 'March', hours: Number(record.March) || 0 },
-      { month: 'April', hours: Number(record.April) || 0 },
-      { month: 'May', hours: Number(record.May) || 0 },
-      { month: 'June', hours: Number(record.June) || 0 },
-      { month: 'July', hours: Number(record.July) || 0 },
-      { month: 'August', hours: Number(record.August) || 0 },
-      { month: 'September', hours: Number(record.September) || 0 },
-      { month: 'October', hours: Number(record.October) || 0 },
-      { month: 'November', hours: Number(record.November) || 0 },
-      { month: 'December', hours: Number(record.December) || 0 },
-    ]);
-  };
-
   async function updateForm(event, formUrl) {
     event.preventDefault();
 
@@ -221,26 +139,19 @@ const LeaderboardAndStatistics = () => {
     if (error) {
       alert(error.message);
     } else {
+      const response = await axiosInstance.post('api/v1/sendemail', { uuid: id });
+      setResponseData(response.data.data);
+      if (error) {
+        console.error('Error fetching data:', error);
+      }
+      else {
+	console.log(responseData);
+      }	 
       setFormUrl(formUrl);
     }
 
     setLoading(false);
   }
-
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleMenuClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleInputChange = (month, value) => {
-    const newData = data.map((d) =>
-      d.month === month ? { ...d, hours: Number(value) } : d
-    );
-    setData(newData);
-  };
 
   return (
     <div className="App">
@@ -256,41 +167,6 @@ const LeaderboardAndStatistics = () => {
               <h1>{error}</h1>
             ) : (
               <>
-                <Button
-                  variant="contained"
-                  aria-controls="input-menu"
-                  aria-haspopup="true"
-                  onClick={handleMenuOpen}
-                  sx={{ mb: 2 }}
-                >
-                  Input Hours (Temporary)
-                </Button>
-                <Menu
-                  id="input-menu"
-                  anchorEl={anchorEl}
-                  open={Boolean(anchorEl)}
-                  onClose={handleMenuClose}
-                >
-                  {data.map((month) => (
-                    <MenuItem key={month.month}>
-                      <label>
-                        {month.month}:
-                        <input
-                          type="number"
-                          value={month.hours}
-                          onChange={(e) =>
-                            handleInputChange(month.month, e.target.value)
-                          }
-                        />l
-                      </label>
-                    </MenuItem>
-                  ))}
-                  <MenuItem>
-                    <Button variant="contained" onClick={handleSubmit}>
-                      Submit
-                    </Button>
-                  </MenuItem>
-                </Menu>
                 <BarChart
                   dataset={data}
                   axisHighlight={{
@@ -365,41 +241,45 @@ const LeaderboardAndStatistics = () => {
             )}
           </div>
         </div>
-        <div style={{ display: "flex", justifyContent: "center" }}>
-          <Box sx={{ mt: 10, mb: 2, width: '50%' }}>
-            <Typography component="h1" variant="h3" gutterBottom>
-              Submit hours
-            </Typography>
-            <p>
-              Submitting hours lets you see your hours in the graph above and in the leaderboard, to help you track your total time volunteering. They also add to your profile to help showcase the work you have completed.
-            </p>
-            <p>
-              You can submit hours by uploading a JPG, PNG, PDF, or DOC/DOCX file. It must include proof that you have completed your hours with a signature and an email to contact the volunteer organizer.
-            </p>
-            <Box
-              component="form"
-              onSubmit={(e) => updateForm(e, form_url)}
-              noValidate
-              sx={{ mt: 1 }}
-            >
-              <HourSubmission
-                url={form_url}
-                size={150}
-                onUpload={(event, url) => {
-                  updateForm(event, url);
-                }}
-              />
-              <Button
-                type="submit"
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-                disabled={loading}
-              >
-                {loading ? "Loading..." : "Confirm Submission"}
-              </Button>
-            </Box>
-          </Box>
-        </div>
+          <div style={{ display: "flex", justifyContent: "center" }}>
+            {!error && (
+              <>
+                <Box sx={{ mt: 10, mb: 2, width: '50%' }}>
+                  <Typography component="h1" variant="h3" gutterBottom>
+                    Submit hours
+                  </Typography>
+                  <p>
+                    Submitting hours lets you see your hours in the graph above and in the leaderboard, to help you track your total time volunteering. They also add to your profile to help showcase the work you have completed.
+                  </p>
+                  <p>
+                    You can submit hours by uploading a JPG, PNG, PDF, or DOC/DOCX file. It must include proof that you have completed your hours with a signature and an email to contact the volunteer organizer.
+                  </p>
+                  <Box
+                    component="form"
+                    onSubmit={(e) => updateForm(e, form_url)}
+                    noValidate
+                    sx={{ mt: 1 }}
+                  >
+                    <HourSubmission
+                      url={form_url}
+                      size={150}
+                      onUpload={(event, url) => {
+                        updateForm(event, url);
+                      }}
+                    />
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      sx={{ mt: 3, mb: 2 }}
+                      disabled={loading}
+                    >
+                      {loading ? "Loading..." : "Confirm Submission"}
+                    </Button>
+                  </Box>
+                </Box>
+              </>
+            )}
+          </div>
       </header>
     </div>
   );
