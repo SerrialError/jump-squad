@@ -127,7 +127,7 @@ function Dashboard() {
           </Grid>
         </div>
         <div style={{ marginTop: '25px', width: '100%' }}>
-          {affiliation !== "No Affiliation" && (
+          {affiliation !== "No Affiliation" || null && (
             <>
               <Typography variant="h4" component="h2" align="center" gutterBottom>
                 Events with {affiliation}

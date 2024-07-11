@@ -17,6 +17,7 @@ const Directory = () => {
       organization: 'Opportunity Village',
       description: 'Join us at our thrift store volunteers assist with sorting, placing, organizing, and moving donations.',
       location: 'Downtown Las Vegas',
+      contact: 'https://www.opportunityvillage.org/thrift-store',
     },
     {
       id: 2,
@@ -24,6 +25,7 @@ const Directory = () => {
       organization: 'Homeless Kids',
       description: 'Project 150 started in December 2011, when we learned that the Clark County School District has an overwhelming number of homeless teenagers attending school.',
       location: 'Downtown Las Vegas',
+      contact: 'https://www.opportunityvillage.org/thrift-store',
     },
     {
       id: 3,
@@ -31,6 +33,7 @@ const Directory = () => {
       organization: 'Local Food Organization',
       description: 'Founded in 1970, the Las Vegas Rescue Mission (LVRM) started with a small storefront building that included the chapel, kitchen and a shelter that could house a few men.',
       location: 'East Las Vegas',
+      contact: 'https://www.opportunityvillage.org/thrift-store',
     },
     {
       id: 4,
@@ -38,6 +41,7 @@ const Directory = () => {
       organization: 'Local Animal Shelter',
       description: 'Help care for and socialize with the animals at the shelter.',
       location: 'North Las Vegas',
+      contact: 'https://www.opportunityvillage.org/thrift-store',
     },
     {
       id: 5,
@@ -45,6 +49,7 @@ const Directory = () => {
       organization: 'Feet Organization',
       description: 'Our programming is based on the premise that we do not just provide a child with a new pair of shoes. We measure their feet on-site to ensure proper fit.',
       location: 'West Las Vegas',
+      contact: 'https://www.opportunityvillage.org/thrift-store',
     },
     {
       id: 6,
@@ -52,6 +57,7 @@ const Directory = () => {
       organization: 'Hello organization',
       description: 'This is a test to make sure the grid height works. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
       location: 'Las Vegas',
+      contact: 'https://www.opportunityvillage.org/thrift-store',
     }
   ];
 
@@ -118,6 +124,9 @@ const Directory = () => {
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
                       Location: {opportunity.location}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      Contact: {opportunity.contact}
                     </Typography>
                   </CardContent>
                 </Card>

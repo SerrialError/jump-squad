@@ -22,7 +22,8 @@ function Goals() {
   const [targetHours, setTargetHours] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [goals, setGoals] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
   const [editingGoalIndex, setEditingGoalIndex] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedGoalIndex, setSelectedGoalIndex] = useState(null);
@@ -42,12 +43,14 @@ function Goals() {
 
   useEffect(() => {
     async function fetchGoals() {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (user) {
-        setUserId(user.id);
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error || !user) {
+        setError('Please sign in to create Goals');
+        setLoading(false);
+        return;
       }
+        
+      setUserId(user.id);
 
       if (id) {
         const { data, error } = await supabase
