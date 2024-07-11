@@ -8,6 +8,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import { styled, useTheme } from "@mui/material/styles";
+import { useAuth } from '../components/AuthContext';
 import Box from "@mui/material/Box";
 import MuiDrawer from "@mui/material/Drawer";
 import MuiAppBar from "@mui/material/AppBar";
@@ -37,7 +38,7 @@ import About from "./About";
 import Signup from "./Signup";
 import Goals from "./Goals";
 import Directory from "./Directory";
-//import PublicProfile from "./PublicProfile"
+import PublicProfile from "./PublicProfile";
 import supabase from '../components/Supabase';
 import Avatar from '../components/Avatar';
 
@@ -247,6 +248,7 @@ function Navbar() {
           <Route path="/Signup" element={<Signup />} />
           <Route path="/Goals" element={<Goals />} />
           <Route path="/Directory" element={<Directory />} />
+          <Route path="/PublicProfile" element={<PublicProfile />} />
         </Routes>
       </Box>
     </Box>

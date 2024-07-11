@@ -31,7 +31,7 @@ function Signup() {
       email: email,
       password: password,
       options: {
-        emailRedirectTo: 'https://jumpsquad.teambirb.com/Login',
+        emailRedirectTo: 'https://jumpsquad.org/Login',
       },
     });
     setLoading(false);

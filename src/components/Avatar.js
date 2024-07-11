@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as ReactRouter from "react-router-dom";
+import { useAuth } from '../components/AuthContext';
 import supabase from '../components/Supabase';
 import Avatar from "@mui/material/Avatar";
 import Divider from "@mui/material/Divider";
@@ -13,80 +14,72 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const AvatarFunc = () => {
   const [userData, setUserData] = React.useState(null);
-  const [userId, setUserId] = React.useState(null);
-  const [session, setSession] = React.useState(null);
-  const navigate = ReactRouter.useNavigate(); // Use navigate to programmatically navigate
+  const [avatarEl, setAvatarEl] = React.useState(null);
+  const navigate = ReactRouter.useNavigate();
+  const { user, setUser } = useAuth();
 
   React.useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
     const fetchUser = async () => {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) {
-          throw new Error('User not found');
-        }
-        setUserId(user.id);
+      if (user) {
+        try {
+          const { data: tableData, error: tableError } = await supabase
+            .from('profiles')
+            .select()
+            .eq('id', user.id);
 
-        const { data: tableData, error: tableError } = await supabase
-          .from('profiles')
-          .select()
-          .eq('id', user.id);
+          if (tableError) throw tableError;
 
-        if (tableError) {
-          throw tableError;
+          if (Array.isArray(tableData) && tableData.length > 0 && tableData[0].avatar_url) {
+            const { data: avatarData } = await supabase.storage.from('avatars').download(tableData[0].avatar_url);
+            const url = URL.createObjectURL(avatarData);
+            setUserData(url);
+          } else {
+            setUserData(user.user_metadata?.avatar_url);
+          }
+        } catch (err) {
+          console.error('Error fetching user:', err);
         }
-
-        if (Array.isArray(tableData) && tableData.length > 0 && tableData[0].avatar_url) {
-          const { data: avatarData } = await supabase.storage.from('avatars').download(tableData[0].avatar_url);
-          const url = URL.createObjectURL(avatarData);
-          setUserData(url);
-        } else {
-          setUserData(user.user_metadata?.avatar_url);
-        }
-      } catch (err) {
-        console.error('Error fetching user:', err);
       }
     };
 
     fetchUser();
-  }, [userId]);
+  }, [user]);
 
-  const [avatarEl, setAvatarEl] = React.useState(null);
-
-  const handleAvatarClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleAvatarClick = (e) => {
     setAvatarEl(e.currentTarget);
   };
 
   const handleAccountClick = () => {
-    !session ? navigate("/Login") : navigate("/Account")
+    user ? navigate("/Account") : navigate("/Login");
   };
   
   const handleDashboardClick = () => {
-    navigate("/")
+    navigate("/");
   };
 
   const handleAvatarClose = () => {
     setAvatarEl(null);
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setUserData(null);
+    navigate("/");
+    handleAvatarClose();
+  };
 
   const avatarPopoverOpen = Boolean(avatarEl);
 
   return (
     <div>
-        <Button variant="light" onClick={handleAvatarClick}>
-          {userData ? (
-            <Avatar alt={userData.user_metadata?.full_name || 'User'} src={userData || ''} />
-          ) : (
-            <AccountCircleIcon />
-          )}
-        </Button>
+      <Button variant="light" onClick={handleAvatarClick}>
+        {userData ? (
+          <Avatar alt={user?.user_metadata?.full_name || 'User'} src={userData} />
+        ) : (
+          <AccountCircleIcon />
+        )}
+      </Button>
 
       <Popover
         open={avatarPopoverOpen}
@@ -106,27 +99,30 @@ const AvatarFunc = () => {
           <Divider />
           <ListItem disablePadding>
             <ListItemButton onClick={handleAccountClick}>
-              {userData ? (
+              {user ? (
                 <ListItemText primary="Account Page" />
               ) : (
                 <ListItemText primary="Sign In" />
               )}
             </ListItemButton>
           </ListItem>
-          {userData && (
-            <><ListItem disablePadding>
-              <ListItemButton onClick={() => navigate("/PublicProfile")}>
-                <ListItemText primary="Public Profile" />
-              </ListItemButton>
-            </ListItem><Divider /><ListItem disablePadding>
-                <ListItemButton onClick={() => supabase.auth.signOut()}>
+          {user && (
+            <>
+              <ListItem disablePadding>
+                <ListItemButton onClick={() => navigate("/PublicProfile")}>
+                  <ListItemText primary="Public Profile" />
+                </ListItemButton>
+              </ListItem>
+              <Divider />
+              <ListItem disablePadding>
+                <ListItemButton onClick={handleSignOut}>
                   <ListItemText primary="Sign Out" />
                 </ListItemButton>
-              </ListItem></>
+              </ListItem>
+            </>
           )}
         </List>
       </Popover>
-
     </div>
   );
 };
