@@ -3,7 +3,7 @@ import UploadIcon from '@mui/icons-material/Upload';
 import Button from '@mui/material/Button';
 import supabase from './Supabase';
 
-export default function InsertForm({ url, size, onUpload }) {
+export default function InsertForm({ url, size, onUpload, onUploadSuccess }) {
   const [formUrl, setFormUrl] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
@@ -47,7 +47,8 @@ export default function InsertForm({ url, size, onUpload }) {
 
       if (!uploadError) {
         onUpload(event, filePath);
-        setUploadSuccess(true); // Set the upload success state to true
+        setUploadSuccess(true);
+        onUploadSuccess(true);
       }
 
       

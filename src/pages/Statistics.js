@@ -37,6 +37,7 @@ const LeaderboardAndStatistics = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [form_url, setFormUrl] = useState(null);
+  const [fileUploaded, setFileUploaded] = useState(false);
   const [responseData, setResponseData] = useState(null); // Update type accordingly
 
   useEffect(() => {
@@ -122,7 +123,7 @@ const LeaderboardAndStatistics = () => {
     fetchUserData();
     fetchStatistics();
   }, [responseData]);
-
+  
   async function updateForm(event, formUrl) {
     event.preventDefault();
 
@@ -170,8 +171,8 @@ const LeaderboardAndStatistics = () => {
                 <BarChart
                   dataset={data}
                   axisHighlight={{
-                    x: 'band',
-                    y: 'none',
+                    x: "band",
+                    y: "none",
                   }}
                   margin={{
                     top: 16,
@@ -207,8 +208,8 @@ const LeaderboardAndStatistics = () => {
                     },
                   ]}
                   sx={{
-                    backgroundColor: 'white',
-                    borderRadius: '20px',
+                    backgroundColor: "white",
+                    borderRadius: "20px",
                     [`.${axisClasses.root} line`]: {
                       stroke: theme.palette.text.secondary,
                     },
@@ -230,43 +231,55 @@ const LeaderboardAndStatistics = () => {
             {fetchError && <p>{fetchError}</p>}
             {statistics.length > 0 && (
               <ol>
-                {statistics.slice(0, 10).map((stat) => ( // Limit to 10 values
-                  <li key={stat.id}>
-                    <p>
-                      {stat.Name}: {stat.totalHours} hours
-                    </p>
-                  </li>
-                ))}
+                {statistics.slice(0, 10).map(
+                  (
+                    stat // Limit to 10 values
+                  ) => (
+                    <li key={stat.id}>
+                      <p>
+                        {stat.Name}: {stat.totalHours} hours
+                      </p>
+                    </li>
+                  )
+                )}
               </ol>
             )}
           </div>
         </div>
-          <div style={{ display: "flex", justifyContent: "center" }}>
-            {!error && (
-              <>
-                <Box sx={{ mt: 10, mb: 2, width: '50%' }}>
-                  <Typography component="h1" variant="h3" gutterBottom>
-                    Submit hours
-                  </Typography>
-                  <p>
-                    Submitting hours lets you see your hours in the graph above and in the leaderboard, to help you track your total time volunteering. They also add to your profile to help showcase the work you have completed.
-                  </p>
-                  <p>
-                    You can submit hours by uploading a JPG, PNG, PDF, or DOC/DOCX file. It must include proof that you have completed your hours with a signature and an email to contact the volunteer organizer.
-                  </p>
-                  <Box
-                    component="form"
-                    onSubmit={(e) => updateForm(e, form_url)}
-                    noValidate
-                    sx={{ mt: 1 }}
-                  >
-                    <HourSubmission
-                      url={form_url}
-                      size={150}
-                      onUpload={(event, url) => {
-                        updateForm(event, url);
-                      }}
-                    />
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          {!error && (
+            <>
+              <Box sx={{ mt: 10, mb: 2, width: "50%" }}>
+                <Typography component="h1" variant="h3" gutterBottom>
+                  Submit hours
+                </Typography>
+                <p>
+                  Submitting hours lets you see your hours in the graph above
+                  and in the leaderboard, to help you track your total time
+                  volunteering. They also add to your profile to help showcase
+                  the work you have completed.
+                </p>
+                <p>
+                  You can submit hours by uploading a JPG, PNG, PDF, or DOC/DOCX
+                  file. It must include proof that you have completed your hours
+                  with a signature and an email to contact the volunteer
+                  organizer.
+                </p>
+                <Box
+                  component="form"
+                  onSubmit={(e) => updateForm(e, form_url)}
+                  noValidate
+                  sx={{ mt: 1 }}
+                >
+                  <HourSubmission
+                    url={form_url}
+                    size={150}
+                    onUpload={(event, url) => {
+                      updateForm(event, url);
+                    }}
+                    onUploadSuccess={(success) => setFileUploaded(success)}
+                  />
+                  {fileUploaded && (
                     <Button
                       type="submit"
                       variant="contained"
@@ -275,11 +288,12 @@ const LeaderboardAndStatistics = () => {
                     >
                       {loading ? "Loading..." : "Confirm Submission"}
                     </Button>
-                  </Box>
+                  )}
                 </Box>
-              </>
-            )}
-          </div>
+              </Box>
+            </>
+          )}
+        </div>
       </header>
     </div>
   );

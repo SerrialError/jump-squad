@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import supabase from '../components/Supabase';
 import GoogleIcon from '@mui/icons-material/Google';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import MicrosoftIcon from '@mui/icons-material/Microsoft';
+import TwitterIcon from '@mui/icons-material/Twitter';
+import XIcon from '@mui/icons-material/X';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -64,6 +67,34 @@ function Signup() {
       console.error("Error during Google sign-in:", googleError);
     } else {
       console.log("Google sign-in data:", googleData);
+    }
+  }
+
+  async function signInWithMicrosoft() {
+    const { data: microsoftData, error: microsoftError } = await supabase.auth.signInWithOAuth({
+      provider: 'azure',
+      options: {
+        redirectTo: `https://jumpsquad.org`,
+      },
+    });
+    if (microsoftError) {
+      console.error("Error during Microsoft sign-in:", microsoftError);
+    } else {
+      console.log("Microsoft sign-in data:", microsoftData);
+    }
+  }
+
+  async function signInWithTwitter() {
+    const { data: twitterData, error: twitterError } = await supabase.auth.signInWithOAuth({
+      provider: 'twitter',
+      options: {
+        redirectTo: `https://jumpsquad.org`,
+      },
+    });
+    if (twitterError) {
+      console.error("Error during Twitter sign-in:", twitterError);
+    } else {
+      console.log("Twitter sign-in data:", twitterData);
     }
   }
 
@@ -157,6 +188,25 @@ function Signup() {
           >
             <GoogleIcon sx={{ mr: 1 }} />
             Sign Up with Google
+          </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{ mt: 1, mb: 2 }}
+            onClick={signInWithMicrosoft}
+          >
+            <MicrosoftIcon sx={{ mr: 1 }} />
+            Sign Up with Microsoft
+          </Button>
+          <Button
+            fullWidth
+            variant="contained"
+            sx={{ mt: 1, mb: 2 }}
+            onClick={signInWithTwitter}
+          >
+            <XIcon sx={{ mr: 1 }} />
+            <TwitterIcon sx={{ mr: 1 }} />
+            Sign Up with Twitter
           </Button>
           <Button
             fullWidth

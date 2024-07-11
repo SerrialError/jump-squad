@@ -88,7 +88,7 @@ function Dashboard() {
           <Typography variant="h4" component="h2" gutterBottom>
             Featured Opportunities for Week of June 16
           </Typography>
-          <Grid container spacing={3}>
+          <Grid container spacing={3} justifyContent="center">
             {[
               { name: 'Opportunity Village Thrift Store', link: 'https://app.betterimpact.com/PublicEnterprise/EnterpriseActivity?enterpriseGuid=e47c0801-34d2-4710-8067-a87c71c30c29&activityGuid=2fced57d-0970-469a-96bc-d859d2bb886c&searchUrl=https%253a%252f%252fapp.betterimpact.com%252fPublicEnterprise%252fEnterpriseSearch%253fEnterpriseGuid%253de47c0801-34d2-4710-8067-a87c71c30c29%2526SearchType%253dOrganization%2526SearchId%253d22981', description: 'Taken from the Opportunity Village website. Join us at our thrift store volunteers assist with sorting, placing, organizing, and moving donations. In addition, special projects and events held at the store are posted as they are scheduled.', image: village },
               { name: 'Project 150', link: 'https://www.project150.org/volunteer-with-us', description: 'Project 150 started in December 2011, when we learned that the Clark County School District has an overwhelming number of homeless teenagers attending school. The issue was highlighted in a local TV news report that focused on 150 homeless students attending Rancho High School. The shock over this hidden reality for over 7,500 students in the Las Vegas Valley created a buzz among a network of friends and business colleagues.', image: project150 },
@@ -126,15 +126,16 @@ function Dashboard() {
             ))}
           </Grid>
         </div>
-        <div style={{ marginTop: '20px' }}>
-          {affiliation === "Full Gospel Las Vegas Church" && (
+        <div style={{ marginTop: '25px', width: '100%' }}>
+          {affiliation !== "No Affiliation" && (
             <>
               <Typography variant="h4" component="h2" align="center" gutterBottom>
-                Full Gospel Church
+                Events with {affiliation}
               </Typography>
-              <Grid container spacing={3}>
+              <Grid container spacing={3} justifyContent="center">
                 {[
                   { name: 'Fireworks Displays', link: 'https://fglvchurch.com', description: 'Firework displays all day at 9415 W Tropicana Ave, Las Vegas, NV 89147.', image: fglv },
+                  // we probably have to move this in some database so it's not hardcoded and can be changed easily
                 ].map((item, index) => (
                   <Grid item xs={12} sm={6} md={3} key={index}>
                     <Card className="card">
@@ -147,7 +148,7 @@ function Dashboard() {
                               </Link>
                             </Typography>
                           </Grid>
-                          <Grid item xs={4}>
+                          <Grid item>
                             <CardMedia
                               className="img-dashboard-table"
                               component="img"

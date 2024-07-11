@@ -46,6 +46,13 @@ const Directory = () => {
       description: 'Our programming is based on the premise that we do not just provide a child with a new pair of shoes. We measure their feet on-site to ensure proper fit.',
       location: 'West Las Vegas',
     },
+    {
+      id: 6,
+      name: 'Test Foundation',
+      organization: 'Hello organization',
+      description: 'This is a test to make sure the grid height works. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      location: 'Las Vegas',
+    }
   ];
 
   const filteredOpportunities = opportunities.filter((opportunity) =>
@@ -63,9 +70,9 @@ const Directory = () => {
           <Box
             sx={{
               marginBottom: 5,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
             <TextField
@@ -81,29 +88,40 @@ const Directory = () => {
               color="primary"
               InputProps={{
                 style: {
-                  backgroundColor: 'white',
+                  backgroundColor: "white",
                 },
               }}
             />
           </Box>
         </Container>
-        <Grid container spacing={3}>
+        <Grid container spacing={3} sx={{ "& .MuiGrid-item": { height: "100" } }}>
           {filteredOpportunities.map((opportunity) => (
             <Grid item xs={12} sm={6} md={4} key={opportunity.id}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h5" component="h2">
-                    {opportunity.name}
-                  </Typography>
-                  <Typography color="textSecondary">{opportunity.organization}</Typography>
-                  <Typography variant="body2" component="p">
-                    {opportunity.description}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    Location: {opportunity.location}
-                  </Typography>
-                </CardContent>
-              </Card>
+              <Box sx={{ height: "100%" }}>
+                <Card
+                  sx={{
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: 'center' 
+                  }}
+                >
+                  <CardContent>
+                    <Typography variant="h5" component="h2">
+                      {opportunity.name}
+                    </Typography>
+                    <Typography color="textSecondary">
+                      {opportunity.organization}
+                    </Typography>
+                    <Typography variant="body2" component="p">
+                      {opportunity.description}
+                    </Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      Location: {opportunity.location}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Box>
             </Grid>
           ))}
         </Grid>
