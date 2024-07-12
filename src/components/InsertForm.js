@@ -83,7 +83,6 @@ export default function InsertForm({ url, size, onUpload }) {
           disabled={uploading}
           />
         </Button>
-
       </div>
     </div>
   )

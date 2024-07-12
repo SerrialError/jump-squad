@@ -73,7 +73,7 @@ const AvatarFunc = () => {
 
   return (
     <div>
-      <Button variant="light" onClick={handleAvatarClick}>
+      <Button variant="light" aria-label="account options" onClick={handleAvatarClick}>
         {userData ? (
           <Avatar alt={user?.user_metadata?.full_name || 'User'} src={userData} />
         ) : (

@@ -81,7 +81,6 @@ export default function Avatar({ url, size, onUpload }) {
           disabled={uploading}
           />
         </Button>
-
       </div>
     </div>
   )

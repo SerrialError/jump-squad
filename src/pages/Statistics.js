@@ -46,7 +46,6 @@ const LeaderboardAndStatistics = () => {
     async function fetchUserData() {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) {
-        setError('Please sign in to view Statistics and submit hours');
         setIsAuthenticated(false);
       } else {
         setIsAuthenticated(true);
@@ -152,7 +151,7 @@ const LeaderboardAndStatistics = () => {
         console.error('Error fetching data:', error);
       }
       else {
-	console.log(responseData);
+	    console.log(responseData);
       }	 
       setFormUrl(formUrl);
     }
@@ -179,9 +178,9 @@ const LeaderboardAndStatistics = () => {
         >
           <Grid container spacing={2}>
             <Grid item xs={12} md={8}>
-              {error ? (
-                <h1>{error}</h1>
-              ) : (
+            {!isAuthenticated ? (
+              <Typography variant="h2" color="white">Please sign in to create Goals</Typography>
+            ) : (
               <>
               {fetchError ? ( 
 		            <h1>{fetchError}</h1>
@@ -216,7 +215,7 @@ const LeaderboardAndStatistics = () => {
                       },
                       tickLabelStyle: theme.typography.body2,
                       tickNumber: 5,
-                      minValue: 0, // Add this line to set the minimum value to 0
+                      minValue: 0,
                     },
                   ]}
                   series={[
@@ -245,7 +244,7 @@ const LeaderboardAndStatistics = () => {
                   }}
                 />
               ) : (
-                <Typography variant="h2" align="center">No Hours Uploaded</Typography>
+                <Typography variant="h2" align="center" color="white">No Hours Uploaded</Typography>
               )
             )}
             </>

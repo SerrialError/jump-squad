@@ -165,7 +165,7 @@ function Navbar() {
         <Toolbar>
           <IconButton
             color="inherit"
-            aria-label="open drawer"
+            aria-label="open menu"
             onClick={handleDrawerOpen}
             edge="start"
             sx={{
@@ -195,7 +195,7 @@ function Navbar() {
       </AppBar>
       <Drawer variant="permanent" open={open}>
         <DrawerHeader>
-          <IconButton onClick={handleDrawerClose}>
+          <IconButton aria-label="open menu" onClick={handleDrawerClose}>
             {theme.direction === "rtl" ? (
               <ChevronRightIcon />
             ) : (
