@@ -5,7 +5,7 @@ A volunteering app that helps you connect and participate in volunteering across
 ## How to run Jump Squad?
 
 ### Prerequisites
-You will need latest version of Node JS, Supabase configuration, and backend with Axios for email sending.
+You will need latest version of Node JS, Supabase configuration, and backend with Axios for email sending (To do that you can just get the other backend branch of this project).
 Supabase configuration and backend will have to be developed yourself as they are not provided.
 You will also have to provide your own API keys.
 
