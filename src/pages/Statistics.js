@@ -62,6 +62,7 @@ const LeaderboardAndStatistics = () => {
       }
 
       if (tableData && tableData.length > 0) {
+	console.log("there is data!");
         const record = tableData[0];
         setData([
           { month: 'January', hours: Number(record.January) || 0 },
@@ -77,7 +78,11 @@ const LeaderboardAndStatistics = () => {
           { month: 'November', hours: Number(record.November) || 0 },
           { month: 'December', hours: Number(record.December) || 0 },
         ]);
+      } else {
+	console.log("No data!");
+        setFetchError("No Hours Uploaded");
       }
+
 
       const { data: formData, error: formError } = await supabase
         .from('Statistics')
@@ -112,6 +117,7 @@ const LeaderboardAndStatistics = () => {
             totalHours
           };
         });
+	
 
         const sortedStatistics = statsWithTotalHours.sort((a, b) => b.totalHours - a.totalHours);
 
@@ -167,7 +173,11 @@ const LeaderboardAndStatistics = () => {
             {error ? (
               <h1>{error}</h1>
             ) : (
+
               <>
+                {fetchError ? ( 
+		  <h1>{fetchError}</h1>
+	        ) : (
                 <BarChart
                   dataset={data}
                   axisHighlight={{
@@ -221,6 +231,7 @@ const LeaderboardAndStatistics = () => {
                     },
                   }}
                 />
+	        )}
               </>
             )}
           </div>
@@ -228,7 +239,6 @@ const LeaderboardAndStatistics = () => {
             <Typography component="h1" variant="h4" gutterBottom>
               Leaderboard
             </Typography>
-            {fetchError && <p>{fetchError}</p>}
             {statistics.length > 0 && (
               <ol>
                 {statistics.slice(0, 10).map(
