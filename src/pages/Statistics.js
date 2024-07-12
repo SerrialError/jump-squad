@@ -179,7 +179,7 @@ const LeaderboardAndStatistics = () => {
           <Grid container spacing={2}>
             <Grid item xs={12} md={8}>
             {!isAuthenticated ? (
-              <Typography variant="h2" color="white">Please sign in to create Goals</Typography>
+              <Typography variant="h2" color="white">Please sign in to submit hours</Typography>
             ) : (
               <>
               {fetchError ? ( 
@@ -269,7 +269,7 @@ const LeaderboardAndStatistics = () => {
         </Grid>
       </Paper>
         <div style={{ display: "flex", justifyContent: "center" }}>
-          {!error && (
+          {isAuthenticated && (
             <>
               <Box sx={{ mt: 10, mb: 2, width: "50%" }}>
                 <Typography component="h1" variant="h3" gutterBottom>
