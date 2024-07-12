@@ -25,6 +25,7 @@ function Dashboard() {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) {
         setError('Please sign in to view Leaderboard');
+	setAffiliation("No Affiliation");
         setLoading(false);
         return;
       }
@@ -45,7 +46,7 @@ function Dashboard() {
     }
 
     fetchAffiliations();
-  }, []);
+  }, [affiliation]);
 
   const carouselItems = [
     {
@@ -127,7 +128,7 @@ function Dashboard() {
           </Grid>
         </div>
         <div style={{ marginTop: '25px', width: '100%' }}>
-          {affiliation !== "No Affiliation" || null && (
+          {affiliation !== "No Affiliation" && (
             <>
               <Typography variant="h4" component="h2" align="center" gutterBottom>
                 Events with {affiliation}
