@@ -1,3 +1,5 @@
+// btw others can't see this page yet its getting the data from your own supabase, we need backend for this
+
 import React, { useState, useEffect } from 'react';
 import supabase from '../components/Supabase';
 import { Typography, Container, Box, Avatar } from '@mui/material';
@@ -16,7 +18,7 @@ function PublicProfile() {
     if (user) {
       const { data, error } = await supabase
         .from('profiles')
-        .select('username, email, avatar_url, affiliation, social')
+        .select('username, social, avatar_url, affiliation')
         .eq('id', user.id)
         .single();
 
@@ -59,7 +61,6 @@ function PublicProfile() {
           sx={{ width: 100, height: 100, mb: 2 }}
         />
         <Typography variant="h4" gutterBottom>{profile.username}</Typography>
-        <Typography variant="body1" gutterBottom>Email: {profile.email}</Typography>
         <Typography variant="body1" gutterBottom>Affiliation: {profile.affiliation}</Typography>
         <Typography variant="body1" gutterBottom>Social Media: {profile.social}</Typography>
         <Typography variant="h6" gutterBottom>Total Volunteering Hours: {totalHours}</Typography>

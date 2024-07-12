@@ -44,7 +44,7 @@ export default function Account({ session }) {
           setUsername(data.username);
           setSocial(data.social);
           setAvatarUrl(data.avatar_url);
-	  setAffiliation(data.affiliation);
+	        setAffiliation(data.affiliation);
         }
       }
 

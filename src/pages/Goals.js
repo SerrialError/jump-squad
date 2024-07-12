@@ -24,6 +24,7 @@ function Goals() {
   const [goals, setGoals] = useState([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [editingGoalIndex, setEditingGoalIndex] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedGoalIndex, setSelectedGoalIndex] = useState(null);
@@ -46,13 +47,13 @@ function Goals() {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) {
         setError('Please sign in to create Goals');
-        setLoading(false);
-        return;
-      }
-        
-      setUserId(user.id);
+        setIsAuthenticated(false);
+      } else {
+        setIsAuthenticated(true);
+        setUserId(user.id);
 
       if (id) {
+        setLoading(false);
         const { data, error } = await supabase
           .from("goals")
           .select("*")
@@ -64,10 +65,11 @@ function Goals() {
           setGoals(data);
         }
       }
+      setLoading(false);
     }
-
-    fetchGoals();
-  }, [id]);
+  }
+  fetchGoals();
+}, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -87,20 +89,24 @@ function Goals() {
       return;
     }
   
-    const { data, error } = await supabase.from('goals').insert([{ ...newGoal }]);
+    try {
+      const { data, error } = await supabase.from('goals').insert([{ ...newGoal }]);
   
       if (error) {
         console.error('Error inserting goal:', error);
-      } else if (data && data.length >= 0) {
+        alert('Failed to save goal. Please try again.');
+      } else if (data && data.length > 0) {
         setGoals([...goals, { ...newGoal, id: data[0].id, logged_hours: 0 }]);
-      } else {
+        setGoalName('');
+        setTargetHours('');
+        setDueDate('');
       }
-  
-    setGoalName('');
-    setTargetHours('');
-    setDueDate('');
-  
-    setLoading(false);
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      alert('An unexpected error occurred. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleEditGoal = (index) => {
@@ -150,17 +156,23 @@ function Goals() {
   };
 
   const handleLogHours = async () => {
+    const hours = parseInt(loggedHours);
+    if (hours <= 0) {
+      alert("Please enter a positive number of hours.");
+      return;
+    }
+  
     const goalId = goals[selectedGoalIndex].id;
     const { error } = await supabase
       .from('goals')
-      .update({ logged_hours: parseInt(loggedHours) })
+      .update({ logged_hours: goals[selectedGoalIndex].logged_hours + hours })
       .eq('id', goalId);
   
     if (error) {
       console.error('Error updating logged hours:', error);
     } else {
       const updatedGoals = [...goals];
-      updatedGoals[selectedGoalIndex].logged_hours = parseInt(loggedHours);
+      updatedGoals[selectedGoalIndex].logged_hours += hours;
       setGoals(updatedGoals);
       setOpenLogHoursDialog(false);
       setLoggedHours('');
@@ -191,184 +203,186 @@ function Goals() {
         <Typography component="h1" variant="h3" gutterBottom>
           Goals
         </Typography>
-        <Container component="main" maxWidth="xs">
-          <CssBaseline />
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-            }}
-          >
-            <Box component="form" onSubmit={handleSubmit} noValidate>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="goalName"
-                label="Goal Name"
-                name="goalName"
-                autoFocus
-                value={goalName}
-                onChange={(e) => setGoalName(e.target.value)}
-                color="primary"
-                InputProps={{
-                  style: {
-                    backgroundColor: "white",
-                  },
-                }}
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="targetHours"
-                label="Target Hours"
-                name="targetHours"
-                type="number"
-                value={targetHours}
-                onChange={(e) => setTargetHours(e.target.value)}
-                color="primary"
-                InputProps={{
-                  style: {
-                    backgroundColor: "white",
-                  },
-                }}
-              />
-              <TextField
-                margin="normal"
-                fullWidth
-                id="dueDate"
-                label="Due Date"
-                name="dueDate"
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                color="primary"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-                inputProps={{
-                  min: currentDate,
-                }}
+        {!isAuthenticated ? (
+          <Typography variant="h2">
+            Please sign in to create Goals
+          </Typography>
+        ) : (
+        <><Container component="main" maxWidth="xs">
+              <CssBaseline />
+              <Box
                 sx={{
-                  backgroundColor: "white",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
                 }}
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-                disabled={loading}
               >
-                {loading
-                  ? "Saving..."
-                  : editingGoalIndex !== null
-                  ? "Update Goal"
-                  : "Save Goal"}
-              </Button>
-            </Box>
-            <Box sx={{ mt: 4 }}>
-              <Typography variant="h6" gutterBottom>
-                Your Goals
-              </Typography>
-              {goals.length === 0 ? (
-                <Typography variant="body1">No goals currently</Typography>
-              ) : (
-                goals.map((goal, index) => (
-                  <Box
-                    key={index}
-                    sx={{
-                      mb: 2,
-                      display: "flex",
-                      alignItems: "center",
-                      backgroundColor: (() => {
-                        const { isOverdue, isCompleted } = isGoalOverdue(goal);
-                        if (isCompleted) {
-                          return "rgba(0, 128, 0, 0.2)"; // Green background for completed goals
-                        } else if (isOverdue) {
-                          return "rgba(255, 0, 0, 0.2)"; // Red background for overdue goals
-                        } else {
-                          return "transparent"; // No background color for active goals
-                        }
-                      })(),
-                      padding: 2,
-                      borderRadius: 2,
+                <Box component="form" onSubmit={handleSubmit} noValidate>
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="goalName"
+                    label="Goal Name"
+                    name="goalName"
+                    autoFocus
+                    value={goalName}
+                    onChange={(e) => setGoalName(e.target.value)}
+                    color="primary"
+                    InputProps={{
+                      style: {
+                        backgroundColor: "white",
+                      },
+                    }} />
+                  <TextField
+                    margin="normal"
+                    required
+                    fullWidth
+                    id="targetHours"
+                    label="Target Hours"
+                    name="targetHours"
+                    type="number"
+                    value={targetHours}
+                    onChange={(e) => setTargetHours(e.target.value)}
+                    color="primary"
+                    InputProps={{
+                      style: {
+                        backgroundColor: "white",
+                      },
+                    }} />
+                  <TextField
+                    margin="normal"
+                    fullWidth
+                    id="dueDate"
+                    label="Due Date"
+                    name="dueDate"
+                    type="date"
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                    color="primary"
+                    InputLabelProps={{
+                      shrink: true,
                     }}
+                    inputProps={{
+                      min: currentDate,
+                    }}
+                    sx={{
+                      backgroundColor: "white",
+                    }} />
+                  <Button
+                    type="submit"
+                    fullWidth
+                    variant="contained"
+                    sx={{ mt: 3, mb: 2 }}
+                    disabled={loading}
                   >
-                    <Box sx={{ flexGrow: 1 }}>
-                      <Typography variant="body1">
-                        <strong>{goal.name}</strong>
-                      </Typography>
-                      <Typography variant="body2">
-                        Target Hours: {goal.target_hours}
-                      </Typography>
-                      <Typography variant="body2">
-                        Logged Hours: {goal.logged_hours}
-                      </Typography>
-                      <Typography variant="body2">
-                        Due Date: {goal.due_date || "No due date"}
-                      </Typography>
-                    </Box>
-                    <Typography variant="body2" sx={{ ml: 2 }}>
-                      {getProgressPercentage(goal)}
-                    </Typography>
-                    <IconButton
-                      aria-label="more"
-                      aria-controls="goal-menu"
-                      aria-haspopup="true"
-                      onClick={(event) => handleMenuOpen(event, index)}
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                    <Menu
-                      id="goal-menu"
-                      anchorEl={anchorEl}
-                      open={Boolean(anchorEl) && selectedGoalIndex === index}
-                      onClose={handleMenuClose}
-                      MenuListProps={{
-                        "aria-labelledby": "goal-menu",
-                      }}
-                    >
-                      <MenuItem onClick={() => handleOpenLogHoursDialog(index)}>
-                        Log Hours
-                      </MenuItem>
-                      <MenuItem onClick={() => handleEditGoal(index)}>
-                        Edit
-                      </MenuItem>
-                      <MenuItem onClick={() => handleDeleteGoal(index)}>
-                        Delete
-                      </MenuItem>
-                    </Menu>
-                  </Box>
-                ))
-              )}
-            </Box>
-          </Box>
-        </Container>
-        <Dialog open={openLogHoursDialog} onClose={handleCloseLogHoursDialog}>
-          <DialogTitle>Log Hours</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Enter the number of hours you want to log for this goal.
-            </DialogContentText>
-            <TextField
-              autoFocus
-              margin="dense"
-              id="loggedHours"
-              label="Logged Hours"
-              type="number"
-              fullWidth
-              value={loggedHours}
-              onChange={(e) => setLoggedHours(e.target.value)}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCloseLogHoursDialog}>Cancel</Button>
-            <Button onClick={handleLogHours}>Log Hours</Button>
-          </DialogActions>
-        </Dialog>
+                    {loading
+                      ? "Saving..."
+                      : editingGoalIndex !== null
+                        ? "Update Goal"
+                        : "Save Goal"}
+                  </Button>
+                </Box>
+                <Box sx={{ mt: 4 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Your Goals
+                  </Typography>
+                  {goals.length === 0 ? (
+                    <Typography variant="body1">No goals currently</Typography>
+                  ) : (
+                    goals.map((goal, index) => (
+                      <Box
+                        key={index}
+                        sx={{
+                          mb: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          backgroundColor: (() => {
+                            const { isOverdue, isCompleted } = isGoalOverdue(goal);
+                            if (isCompleted) {
+                              return "rgba(0, 128, 0, 0.2)"; // Green background for completed goals
+                            } else if (isOverdue) {
+                              return "rgba(255, 0, 0, 0.2)"; // Red background for overdue goals
+                            } else {
+                              return "transparent"; // No background color for active goals
+                            }
+                          })(),
+                          padding: 2,
+                          borderRadius: 2,
+                        }}
+                      >
+                        <Box sx={{ flexGrow: 1 }}>
+                          <Typography variant="body1">
+                            <strong>{goal.name}</strong>
+                          </Typography>
+                          <Typography variant="body2">
+                            Target Hours: {goal.target_hours}
+                          </Typography>
+                          <Typography variant="body2">
+                            Logged Hours: {goal.logged_hours}
+                          </Typography>
+                          <Typography variant="body2">
+                            Due Date: {goal.due_date || "No due date"}
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" sx={{ ml: 2 }}>
+                          {getProgressPercentage(goal)}
+                        </Typography>
+                        <IconButton
+                          aria-label="more"
+                          aria-controls="goal-menu"
+                          aria-haspopup="true"
+                          onClick={(event) => handleMenuOpen(event, index)}
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
+                        <Menu
+                          id="goal-menu"
+                          anchorEl={anchorEl}
+                          open={Boolean(anchorEl) && selectedGoalIndex === index}
+                          onClose={handleMenuClose}
+                          MenuListProps={{
+                            "aria-labelledby": "goal-menu",
+                          }}
+                        >
+                          <MenuItem onClick={() => handleOpenLogHoursDialog(index)}>
+                            Log Hours
+                          </MenuItem>
+                          <MenuItem onClick={() => handleEditGoal(index)}>
+                            Edit
+                          </MenuItem>
+                          <MenuItem onClick={() => handleDeleteGoal(index)}>
+                            Delete
+                          </MenuItem>
+                        </Menu>
+                      </Box>
+                    ))
+                  )}
+                </Box>
+              </Box>
+            </Container><Dialog open={openLogHoursDialog} onClose={handleCloseLogHoursDialog}>
+                <DialogTitle>Log Hours</DialogTitle>
+                <DialogContent>
+                  <DialogContentText>
+                    Enter the number of hours you want to log for this goal.
+                  </DialogContentText>
+                  <TextField
+                    autoFocus
+                    margin="dense"
+                    id="loggedHours"
+                    label="Logged Hours"
+                    type="number"
+                    fullWidth
+                    value={loggedHours}
+                    onChange={(e) => setLoggedHours(e.target.value)}
+                    inputProps={{ min: 1 }} />
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleCloseLogHoursDialog}>Cancel</Button>
+                  <Button onClick={handleLogHours}>Log Hours</Button>
+                </DialogActions>
+              </Dialog></>
+        )}
       </header>
     </div>
   );

@@ -19,13 +19,19 @@ function Dashboard() {
   const [affiliation, setAffiliation] = React.useState(null);
   const [error, setError] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
+  const currentDate = new Date();
+  const formattedDate = currentDate.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
 
   React.useEffect(() => {
     async function fetchAffiliations() {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) {
         setError('Please sign in to view Leaderboard');
-	setAffiliation("No Affiliation");
+	      setAffiliation("No Affiliation");
         setLoading(false);
         return;
       }
@@ -87,7 +93,7 @@ function Dashboard() {
         </div>
         <div style={{ marginTop: '75px' }}>
           <Typography variant="h4" component="h2" gutterBottom>
-            Featured Opportunities for Week of June 16
+            Featured Opportunities for {formattedDate}
           </Typography>
           <Grid container spacing={3} justifyContent="center">
             {[

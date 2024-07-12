@@ -108,11 +108,6 @@ const AvatarFunc = () => {
           </ListItem>
           {user && (
             <>
-              <ListItem disablePadding>
-                <ListItemButton onClick={() => navigate("/PublicProfile")}>
-                  <ListItemText primary="Public Profile" />
-                </ListItemButton>
-              </ListItem>
               <Divider />
               <ListItem disablePadding>
                 <ListItemButton onClick={handleSignOut}>

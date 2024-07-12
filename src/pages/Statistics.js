@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '@mui/material/styles';
 import { BarChart, axisClasses } from '@mui/x-charts';
+import { Grid, Paper } from '@mui/material';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import HourSubmission from '../components/HourSubmission';
@@ -36,67 +37,66 @@ const LeaderboardAndStatistics = () => {
   const [id, setUserId] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [form_url, setFormUrl] = useState(null);
   const [fileUploaded, setFileUploaded] = useState(false);
-  const [responseData, setResponseData] = useState(null); // Update type accordingly
+  const [responseData, setResponseData] = useState(null);
 
   useEffect(() => {
     async function fetchUserData() {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) {
         setError('Please sign in to view Statistics and submit hours');
-        setLoading(false);
-        return;
-      }
-
-      setUserId(user.id);
-
-      const { data: tableData, error: tableError } = await supabase
-        .from('Statistics')
-        .select()
-        .eq('id', user.id);
-
-      if (tableError) {
-        console.log(tableError);
-        return;
-      }
-
-      if (tableData && tableData.length > 0) {
-	console.log("there is data!");
-        const record = tableData[0];
-        setData([
-          { month: 'January', hours: Number(record.January) || 0 },
-          { month: 'February', hours: Number(record.February) || 0 },
-          { month: 'March', hours: Number(record.March) || 0 },
-          { month: 'April', hours: Number(record.April) || 0 },
-          { month: 'May', hours: Number(record.May) || 0 },
-          { month: 'June', hours: Number(record.June) || 0 },
-          { month: 'July', hours: Number(record.July) || 0 },
-          { month: 'August', hours: Number(record.August) || 0 },
-          { month: 'September', hours: Number(record.September) || 0 },
-          { month: 'October', hours: Number(record.October) || 0 },
-          { month: 'November', hours: Number(record.November) || 0 },
-          { month: 'December', hours: Number(record.December) || 0 },
-        ]);
+        setIsAuthenticated(false);
       } else {
-	console.log("No data!");
-        setFetchError("No Hours Uploaded");
+        setIsAuthenticated(true);
+        setUserId(user.id);
+
+        const { data: tableData, error: tableError } = await supabase
+          .from('Statistics')
+          .select()
+          .eq('id', user.id);
+
+        if (tableError) {
+          console.log(tableError);
+          return;
+        }
+
+        if (tableData && tableData.length > 0) {
+          const record = tableData[0];
+          setData([
+            { month: 'January', hours: Number(record.January) || 0 },
+            { month: 'February', hours: Number(record.February) || 0 },
+            { month: 'March', hours: Number(record.March) || 0 },
+            { month: 'April', hours: Number(record.April) || 0 },
+            { month: 'May', hours: Number(record.May) || 0 },
+            { month: 'June', hours: Number(record.June) || 0 },
+            { month: 'July', hours: Number(record.July) || 0 },
+            { month: 'August', hours: Number(record.August) || 0 },
+            { month: 'September', hours: Number(record.September) || 0 },
+            { month: 'October', hours: Number(record.October) || 0 },
+            { month: 'November', hours: Number(record.November) || 0 },
+            { month: 'December', hours: Number(record.December) || 0 },
+          ]);
+        } else {
+          setData([]);
       }
 
 
-      const { data: formData, error: formError } = await supabase
-        .from('Statistics')
-        .select('form_url')
-        .eq('id', user.id)
-        .single();
+        const { data: formData, error: formError } = await supabase
+          .from('Statistics')
+          .select('form_url')
+          .eq('id', user.id)
+          .single();
 
-      if (formError) {
-        console.warn(formError);
-      } else if (formData) {
-        setFormUrl(formData.form_url);
+        if (formError) {
+          console.warn(formError);
+        } else if (formData) {
+          setFormUrl(formData.form_url);
+        }
+
+        setLoading(false);
       }
-
-      setLoading(false);
     }
 
     async function fetchStatistics() {
@@ -121,15 +121,15 @@ const LeaderboardAndStatistics = () => {
 
         const sortedStatistics = statsWithTotalHours.sort((a, b) => b.totalHours - a.totalHours);
 
-        setStatistics(sortedStatistics.slice(0, 10)); // Limit to 10 values
+        setStatistics(sortedStatistics.slice(0, 10));
         setFetchError(null);
       }
     }
 
     fetchUserData();
     fetchStatistics();
-  }, [responseData]);
-  
+  }, [responseData]);  
+
   async function updateForm(event, formUrl) {
     event.preventDefault();
 
@@ -166,18 +166,27 @@ const LeaderboardAndStatistics = () => {
         <Typography component="h1" variant="h3" gutterBottom>
           Statistics
         </Typography>
-        <div
-          style={{ display: "flex", height: "40vh", justifyContent: "center" }}
+        <Paper
+          style={{ 
+            display: "flex", 
+            height: "60vh", 
+            width: "80%", 
+            justifyContent: "center",
+            padding: "20px",
+            backgroundColor: "rgb(255, 255, 255, 0.1)",
+            borderRadius: "15px",
+          }}
         >
-          <div style={{ width: "80%", height: "100%" }}>
-            {error ? (
-              <h1>{error}</h1>
-            ) : (
-
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={8}>
+              {error ? (
+                <h1>{error}</h1>
+              ) : (
               <>
-                {fetchError ? ( 
-		  <h1>{fetchError}</h1>
-	        ) : (
+              {fetchError ? ( 
+		            <h1>{fetchError}</h1>
+	            ) : (
+                data.length > 0 ? (
                 <BarChart
                   dataset={data}
                   axisHighlight={{
@@ -230,32 +239,36 @@ const LeaderboardAndStatistics = () => {
                       transform: "translateX(-25px)",
                     },
                   }}
+                  tooltip={{
+                    trigger: 'item',
+                    formatter: (params) => `${params.value} hours`
+                  }}
                 />
-	        )}
-              </>
+              ) : (
+                <Typography variant="h2" align="center">No Hours Uploaded</Typography>
+              )
             )}
-          </div>
-          <div>
-            <Typography component="h1" variant="h4" gutterBottom>
+            </>
+          )}
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Typography component="h2" variant="h4" color="white" gutterBottom>
               Leaderboard
             </Typography>
             {statistics.length > 0 && (
-              <ol>
-                {statistics.slice(0, 10).map(
-                  (
-                    stat // Limit to 10 values
-                  ) => (
-                    <li key={stat.id}>
-                      <p>
-                        {stat.Name}: {stat.totalHours} hours
-                      </p>
-                    </li>
-                  )
-                )}
+              <ol style={{ color: 'white', fontSize: "1.5rem" }}>
+                {statistics.slice(0, 10).map((stat) => (
+                  <li key={stat.id}>
+                    <Typography component="h2" variant="h5" color="white">
+                      {stat.Name}: {stat.totalHours} hours
+                    </Typography>
+                  </li>
+                ))}
               </ol>
             )}
-          </div>
-        </div>
+          </Grid>
+        </Grid>
+      </Paper>
         <div style={{ display: "flex", justifyContent: "center" }}>
           {!error && (
             <>
