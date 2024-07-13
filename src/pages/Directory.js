@@ -52,8 +52,27 @@ const Directory = () => {
   };
 
   const handleApiLoaded = (map, maps) => {
-    // add code here if ever needed
-    console.log("Map loaded successfully");
+    if (selectedOpportunity) {
+      const marker = new maps.Marker({
+        position: {
+          lat: parseFloat(selectedOpportunity.latitude),
+          lng: parseFloat(selectedOpportunity.longitude)
+        },
+        map,
+        title: selectedOpportunity.name
+      });
+
+      const infoWindow = new maps.InfoWindow({
+        content: `<div>
+          <h3>${selectedOpportunity.name}</h3>
+          <h3>${selectedOpportunity.location}</h3>
+        </div>`
+      });
+  
+      marker.addListener('click', () => {
+        infoWindow.open(map, marker);
+      });
+    }
   };
 
   const opportunities = [
@@ -239,25 +258,19 @@ const Directory = () => {
                 </Box>
                 <Box sx={{ width: "50%" }}>
                   <GoogleMapReact
-                    bootstrapURLKeys={{ key: process.env.REACT_APP_GOOGLE_MAPS_API_KEY }}
+                    bootstrapURLKeys={{
+                      key: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
+                    }}
                     center={{
                       lat: parseFloat(selectedOpportunity.latitude),
                       lng: parseFloat(selectedOpportunity.longitude),
                     }}
                     defaultZoom={17}
                     yesIWantToUseGoogleMapApiInternals
-                    onGoogleApiLoaded={({ map, maps }) => handleApiLoaded(map, maps)}
-                  >
-                     {selectedOpportunity && (
-                      <ClickableMarker
-                        // rn the pin moves with the map, so we need to set the position of the pin to the location of the address
-                        lat={selectedOpportunity.latitude}
-                        lng={selectedOpportunity.longitude}
-                        text="📍"
-                        info={`${selectedOpportunity.name}\n${selectedOpportunity.location}`}
-                      />
-                    )}
-                  </GoogleMapReact>
+                    onGoogleApiLoaded={({ map, maps }) =>
+                      handleApiLoaded(map, maps)
+                    }
+                  />
                 </Box>
               </Box>
               <Typography id="modal-description" sx={{ mt: 2 }}>
