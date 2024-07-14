@@ -7,49 +7,27 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { Card, CardContent, Grid } from '@mui/material';
 import { Modal, Button } from '@mui/material';
+import Popover from "@mui/material/Popover";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
 import GoogleMapReact from "google-map-react";
 import noimage from '../images/no-image.png';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 
 const Directory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
+  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
+  const [filterEl, setFilterEl] = React.useState(null);
 
-  const ClickableMarker = ({ text, info }) => {
-    const [showInfo, setShowInfo] = useState(false);
-  
-    console.log(selectedOpportunity.latitude, selectedOpportunity.longitude);
-
-    return (
-      <div
-        onClick={() => setShowInfo(!showInfo)}
-        style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          color: 'red',
-          fontSize: '30px',
-          transform: 'translate(-50%, -50%)',
-          cursor: 'pointer'
-        }}
-      >
-        {text}
-        {showInfo && (
-          <div style={{
-            position: 'absolute',
-            backgroundColor: 'white',
-            padding: '5px',
-            borderRadius: '5px',
-            fontSize: '14px',
-            color: 'black',
-            width: '150px',
-            zIndex: 1000
-          }}>
-            {info}
-          </div>
-        )}
-      </div>
-    );
-  };
+  const [favorites, setFavorites] = useState(() => {
+    const savedFavorites = localStorage.getItem('favorites');
+    return savedFavorites ? JSON.parse(savedFavorites) : [];
+  });
 
   const handleApiLoaded = (map, maps) => {
     if (selectedOpportunity) {
@@ -134,8 +112,20 @@ const Directory = () => {
     }
   ];
 
+  const toggleFavorite = (opportunityId) => {
+    setFavorites(prevFavorites => {
+      const newFavorites = prevFavorites.includes(opportunityId)
+        ? prevFavorites.filter(id => id !== opportunityId)
+        : [...prevFavorites, opportunityId];
+      
+      localStorage.setItem('favorites', JSON.stringify(newFavorites));
+      return newFavorites;
+    });
+  }; 
+
   const filteredOpportunities = opportunities.filter((opportunity) =>
-    opportunity.name.toLowerCase().includes(searchTerm.toLowerCase())
+    opportunity.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+    (!showOnlyFavorites || favorites.includes(opportunity.id))
   );
 
   const handleOpenModal = (opportunity) => {
@@ -145,6 +135,20 @@ const Directory = () => {
   const handleCloseModal = () => {
     setSelectedOpportunity(null);
   };  
+
+  const handleFilterClick = (e) => {
+    setFilterEl(e.currentTarget);
+  };
+
+  const handleFilterClose = () => {
+    setFilterEl(null);
+  };
+
+  const handleFavoriteClick = () => {
+    setShowOnlyFavorites(!showOnlyFavorites);
+  };
+
+  const filterPopoverOpen = Boolean(filterEl);
 
   return (
     <>
@@ -163,6 +167,14 @@ const Directory = () => {
                 alignItems: "center",
               }}
             >
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  width: "100%",
+                }}
+              >
               <TextField
                 margin="normal"
                 fullWidth
@@ -180,6 +192,35 @@ const Directory = () => {
                   },
                 }}
               />
+                <Button
+                  variant="light"
+                  aria-label="account options"
+                  onClick={handleFilterClick}
+                >
+                  <FilterAltOutlinedIcon sx={{ fontSize: "2rem" }} />
+                </Button>
+              </Box>
+              <Popover
+                open={filterPopoverOpen}
+                anchorEl={filterEl}
+                onClose={handleFilterClose}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+              >
+                <List disablePadding>
+                  <ListItem disablePadding>
+                    <ListItemButton onClick={handleFavoriteClick}>
+                      <ListItemText
+                        primary={
+                          showOnlyFavorites ? "Show All" : "Show Only Favorites"
+                        }
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                </List>
+              </Popover>
             </Box>
           </Container>
           <Grid
@@ -197,6 +238,7 @@ const Directory = () => {
                       flexDirection: "column",
                       justifyContent: "center",
                       cursor: "pointer",
+                      position: "relative",
                     }}
                     onClick={() => handleOpenModal(opportunity)}
                   >
@@ -216,6 +258,19 @@ const Directory = () => {
                       <Typography variant="body2" color="textSecondary">
                         Contact: {opportunity.contact}
                       </Typography>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(opportunity.id);
+                        }}
+                        sx={{ position: "absolute", top: 5, right: 5 }}
+                      >
+                        {favorites.includes(opportunity.id) ? (
+                          <FavoriteIcon color="error" />
+                        ) : (
+                          <FavoriteBorderIcon />
+                        )}
+                      </Button>
                     </CardContent>
                   </Card>
                 </Box>
