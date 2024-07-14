@@ -13,10 +13,12 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import GoogleMapReact from "google-map-react";
+import supabase from '../components/Supabase';
 import noimage from '../images/no-image.png';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
+import AddIcon from '@mui/icons-material/Add';
 
 const Directory = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,6 +61,7 @@ const Directory = () => {
       name: 'Opportunity Village Thrift Store',
       organization: 'Opportunity Village',
       description: 'Join us at our thrift store volunteers assist with sorting, placing, organizing, and moving donations.',
+      date: new Date('2024-07-13:00:00'),
       location: 'Downtown Las Vegas',
       latitude: '36.16886114726847',
       longitude: '-115.2072297310761',
@@ -70,6 +73,7 @@ const Directory = () => {
       name: 'Project 150',
       organization: 'Homeless Kids',
       description: 'Project 150 started in December 2011, when we learned that the Clark County School District has an overwhelming number of homeless teenagers attending school.',
+      date: new Date('2024-01-01T00:00:00'),
       location: 'Downtown Las Vegas',
       contact: 'https://www.opportunityvillage.org/thrift-store',
       image: noimage,
@@ -79,6 +83,7 @@ const Directory = () => {
       name: 'Las Vegas Rescue Mission',
       organization: 'Local Food Organization',
       description: 'Founded in 1970, the Las Vegas Rescue Mission (LVRM) started with a small storefront building that included the chapel, kitchen and a shelter that could house a few men.',
+      date: new Date('2024-01-01T00:00:00'),
       location: 'East Las Vegas',
       contact: 'https://www.opportunityvillage.org/thrift-store',
       image: noimage,
@@ -88,6 +93,7 @@ const Directory = () => {
       name: 'Animal Shelter Volunteer',
       organization: 'Local Animal Shelter',
       description: 'Help care for and socialize with the animals at the shelter.',
+      date: new Date('2024-01-01T00:00:00'),
       location: 'North Las Vegas',
       contact: 'https://www.opportunityvillage.org/thrift-store',
       image: noimage,
@@ -97,6 +103,7 @@ const Directory = () => {
       name: 'Goodie Two Shoes Foundation',
       organization: 'Feet Organization',
       description: 'Our programming is based on the premise that we do not just provide a child with a new pair of shoes. We measure their feet on-site to ensure proper fit.',
+      date: new Date('2024-01-01T00:00:00'),
       location: 'West Las Vegas',
       contact: 'https://www.opportunityvillage.org/thrift-store',
       image: noimage,
@@ -106,6 +113,7 @@ const Directory = () => {
       name: 'Test Foundation',
       organization: 'Hello organization',
       description: 'This is a test to make sure the grid height works. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+      date: new Date('2024-01-01T00:00:00'),
       location: 'Las Vegas',
       contact: 'https://www.opportunityvillage.org/thrift-store',
       image: noimage,
@@ -120,8 +128,31 @@ const Directory = () => {
       
       localStorage.setItem('favorites', JSON.stringify(newFavorites));
       return newFavorites;
+
+      // this only saves the favorites to local storage it does not save to the actual database
     });
   }; 
+
+  const addToCalendar = async (opportunity) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data, error } = await supabase
+        .from('directory_events')
+        .insert({
+          id: user.id,
+          name: opportunity.name,
+          date: opportunity.date,
+          location: opportunity.location
+        });
+      if (error) {
+        console.error('Error adding event to calendar:', error);
+      } else {
+        alert('Event added to calendar!');
+      }
+    } else {
+      alert('Please sign in to add events to your calendar.');
+    }
+  };
 
   const filteredOpportunities = opportunities.filter((opportunity) =>
     opportunity.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
@@ -175,23 +206,23 @@ const Directory = () => {
                   width: "100%",
                 }}
               >
-              <TextField
-                margin="normal"
-                fullWidth
-                id="search"
-                label="Search Opportunities"
-                name="search"
-                autoComplete="search"
-                autoFocus
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                color="primary"
-                InputProps={{
-                  style: {
-                    backgroundColor: "white",
-                  },
-                }}
-              />
+                <TextField
+                  margin="normal"
+                  fullWidth
+                  id="search"
+                  label="Search Opportunities"
+                  name="search"
+                  autoComplete="search"
+                  autoFocus
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  color="primary"
+                  InputProps={{
+                    style: {
+                      backgroundColor: "white",
+                    },
+                  }}
+                />
                 <Button
                   variant="light"
                   aria-label="account options"
@@ -253,6 +284,9 @@ const Directory = () => {
                         {opportunity.description}
                       </Typography>
                       <Typography variant="body2" color="textSecondary">
+                        Date: {opportunity.date.toLocaleDateString()}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
                         Location: {opportunity.location}
                       </Typography>
                       <Typography variant="body2" color="textSecondary">
@@ -270,6 +304,15 @@ const Directory = () => {
                         ) : (
                           <FavoriteBorderIcon />
                         )}
+                      </Button>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCalendar(opportunity);
+                        }}
+                        sx={{ position: "absolute", top: 5, right: 40 }}
+                      >
+                        <AddIcon />
                       </Button>
                     </CardContent>
                   </Card>
