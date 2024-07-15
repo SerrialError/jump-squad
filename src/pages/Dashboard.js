@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, { useEffect } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
@@ -22,7 +22,7 @@ function Dashboard() {
   const [affiliation, setAffiliation] = React.useState(null);
   const [error, setError] = React.useState(null);
   const [loading, setLoading] = React.useState(true);
-  const [upcomingEvents, setUpcomingEvents] = React.useState([]);
+  const [calendarEvents, setCalendarEvents] = React.useState([]);
   const currentDate = new Date();
   const formattedDate = currentDate.toLocaleDateString('en-US', { 
     year: 'numeric', 
@@ -31,7 +31,29 @@ function Dashboard() {
   });
   const localizer = momentLocalizer(moment);
 
-  React.useEffect(() => {
+  const fetchCalendarEvents = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data, error } = await supabase
+        .from('directory_events')
+        .select('*')
+        .eq('user_id', user.id);
+      if (error) {
+        console.error('Error fetching calendar events:', error);
+      } else {
+        setCalendarEvents(data.map(event => ({
+          title: event.name,
+          start: new Date(event.date),
+          end: new Date(event.date),
+          location: event.location,
+          allDay: true,
+          // maybe add feature to set times that you will attend the opportunity?
+        })));
+      }
+    }
+  };
+
+  useEffect(() => {
     async function fetchEvents() {
       const { data: userData, error: userError } = await supabase.auth.getUser();
       if (userError || !userData?.user) {
@@ -40,25 +62,6 @@ function Dashboard() {
         setLoading(false);
         return;
       }
-    
-      const user = userData.user;
-    
-      const { data: directoryEvents, error: directoryError } = await supabase
-        .from("directory_events")
-        .select("*")
-        .eq("id", user.id)
-        .gte("date", new Date().toISOString())
-        .order("date", { ascending: true });
-    
-      if (directoryError) {
-        console.error("Error fetching directory events:", directoryError);
-        return;
-      }
-
-      // currently broken as it doesnt return any events
-    
-      setUpcomingEvents(directoryEvents || []);
-      console.log("Upcoming events:", directoryEvents);
     }
 
     async function fetchAffiliations() {
@@ -85,6 +88,7 @@ function Dashboard() {
       setLoading(false);
     }
 
+    fetchCalendarEvents();
     fetchEvents();
     fetchAffiliations();
   }, [affiliation]);
@@ -101,15 +105,6 @@ function Dashboard() {
     {
       image: lvrm,
       description: 'Image 3 description',
-    },
-  ];
-
-  const defaultEvents = [
-    {
-      title: 'Test Event',
-      start: new Date(),
-      end: new Date(),
-      allDay: true,
     },
   ];
 
@@ -139,10 +134,10 @@ function Dashboard() {
           Schedule
         </Typography>
         <Paper
-          style={{ 
-            display: "flex", 
-            height: "43vh", 
-            width: "80%", 
+          style={{
+            display: "flex",
+            height: "43vh",
+            width: "80%",
             justifyContent: "center",
             padding: "20px",
             backgroundColor: "rgb(255, 255, 255)",
@@ -155,15 +150,11 @@ function Dashboard() {
               <div style={{ height: 500, marginBottom: "25px" }}>
                 <Calendar
                   localizer={localizer}
-                  events={upcomingEvents.map((event) => ({
-                    title: event.name,
-                    start: new Date(event.date),
-                    end: new Date(event.date),
-                    allDay: true,
-                  }))}
+                  events={calendarEvents}
                   startAccessor="start"
                   endAccessor="end"
                   style={{ height: "100%" }}
+                  views={['month', 'week', 'agenda']}
                 />
               </div>
             </Grid>
@@ -176,23 +167,20 @@ function Dashboard() {
               >
                 Your Volunteer Schedule
               </Typography>
-              {upcomingEvents.length > 0 ? (
+              {calendarEvents.length > 0 ? (
                 <Grid container spacing={2}>
-                  {upcomingEvents.map((event, index) => (
+                  {calendarEvents.map((event, index) => (
                     <Grid item xs={12} key={index}>
                       <Card className="card">
                         <CardContent>
                           <Typography gutterBottom variant="h5" component="div">
-                            {event.name}
+                            {event.title}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            Date: {new Date(event.date).toLocaleDateString()}
+                            Date: {event.start.toLocaleDateString()}
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
-                            Time: {event.time}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Location: {event.location}
+                            Location: {event.location || "Not specified"}
                           </Typography>
                         </CardContent>
                       </Card>

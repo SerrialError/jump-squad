@@ -42,8 +42,22 @@ function Goals() {
 
   const currentDate = getCurrentDate();
 
+  const fetchGoals = async (userId) => {
+    const { data, error } = await supabase
+      .from("goals")
+      .select("*")
+      .eq("user_id", userId);
+  
+    if (error) {
+      console.error("Error fetching goals:", error);
+    } else {
+      setGoals(data);
+    }
+    setLoading(false);
+  };
+  
   useEffect(() => {
-    async function fetchGoals() {
+    async function checkAuth() {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) {
         setError('Please sign in to create Goals');
@@ -51,25 +65,11 @@ function Goals() {
       } else {
         setIsAuthenticated(true);
         setUserId(user.id);
-
-      if (id) {
-        setLoading(false);
-        const { data, error } = await supabase
-          .from("goals")
-          .select("*")
-          .eq("id", user.id);
-
-        if (error) {
-          console.error("Error fetching goals:", error);
-        } else {
-          setGoals(data);
-        }
+        fetchGoals(user.id);
       }
-      setLoading(false);
     }
-  }
-  fetchGoals();
-}, []);
+    checkAuth();
+  }, []);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -80,7 +80,7 @@ function Goals() {
       target_hours: targetHours,
       due_date: dueDate,
       logged_hours: 0,
-      id: id
+      user_id: id,
     };
   
     if (new Date(dueDate) < new Date(currentDate)) {
@@ -119,14 +119,16 @@ function Goals() {
   };
 
   const handleDeleteGoal = async (index) => {
-    const goalId = goals[index].id;
-    const { error } = await supabase.from('goals').delete().eq('id', goalId);
+    const goalToDelete = goals[index];
+    const { error } = await supabase
+      .from('goals')
+      .delete()
+      .eq('id', goalToDelete.id);
   
     if (error) {
       console.error('Error deleting goal:', error);
     } else {
-      const updatedGoals = [...goals];
-      updatedGoals.splice(index, 1);
+      const updatedGoals = goals.filter(goal => goal.id !== goalToDelete.id);
       setGoals(updatedGoals);
       setAnchorEl(null);
     }
@@ -285,7 +287,7 @@ function Goals() {
                 </Box>
                 <Box sx={{ mt: 4 }}>
                   <Typography variant="h6" gutterBottom>
-                    Your Goals
+                    Your Goals (delete does not work)
                   </Typography>
                   {goals.length === 0 ? (
                     <Typography variant="body1">No goals currently</Typography>

@@ -1,5 +1,5 @@
 import '../App.css';
-import React, { useState, Component } from 'react';
+import React, { useState, Component, useEffect } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
@@ -19,12 +19,14 @@ import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import AddIcon from '@mui/icons-material/Add';
+import CheckIcon from '@mui/icons-material/Check';
 
 const Directory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
   const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
   const [filterEl, setFilterEl] = React.useState(null);
+  const [calendarEvents, setCalendarEvents] = useState([]);
 
   const [favorites, setFavorites] = useState(() => {
     const savedFavorites = localStorage.getItem('favorites');
@@ -136,21 +138,51 @@ const Directory = () => {
   const addToCalendar = async (opportunity) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      const { data, error } = await supabase
-        .from('directory_events')
-        .insert({
-          id: user.id,
-          name: opportunity.name,
-          date: opportunity.date,
-          location: opportunity.location
-        });
-      if (error) {
-        console.error('Error adding event to calendar:', error);
+      if (calendarEvents.includes(opportunity.name)) {
+        const { error } = await supabase
+          .from('directory_events')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('name', opportunity.name);
+        if (error) {
+          console.error('Error removing event from calendar:', error);
+        } else {
+          setCalendarEvents(prev => prev.filter(name => name !== opportunity.name));
+          alert('Event removed from calendar!');
+        }
       } else {
-        alert('Event added to calendar!');
+        const { error } = await supabase
+          .from('directory_events')
+          .insert({
+            user_id: user.id,
+            name: opportunity.name,
+            date: opportunity.date,
+            location: opportunity.location
+          });
+        if (error) {
+          console.error('Error adding event to calendar:', error);
+        } else {
+          setCalendarEvents(prev => [...prev, opportunity.name]);
+          alert('Event added to calendar!');
+        }
       }
     } else {
-      alert('Please sign in to add events to your calendar.');
+      alert('Please sign in to manage your calendar events.');
+    }
+  };
+  
+  const fetchCalendarEvents = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data, error } = await supabase
+        .from('directory_events')
+        .select('name')
+        .eq('user_id', user.id);
+      if (error) {
+        console.error('Error fetching calendar events:', error);
+      } else {
+        setCalendarEvents(data.map(event => event.name));
+      }
     }
   };
 
@@ -181,12 +213,16 @@ const Directory = () => {
 
   const filterPopoverOpen = Boolean(filterEl);
 
+  useEffect(() => {
+    fetchCalendarEvents();
+  }, []);
+
   return (
     <>
       <div className="App">
         <header className="App-header">
           <Typography component="h1" variant="h3" gutterBottom>
-            Directory
+            Directory (delete not working)
           </Typography>
           <Container component="main" maxWidth="xs">
             <CssBaseline />
@@ -312,7 +348,11 @@ const Directory = () => {
                         }}
                         sx={{ position: "absolute", top: 5, right: 40 }}
                       >
-                        <AddIcon />
+                        {calendarEvents.includes(opportunity.name) ? (
+                          <CheckIcon />
+                        ) : (
+                          <AddIcon />
+                        )}
                       </Button>
                     </CardContent>
                   </Card>
