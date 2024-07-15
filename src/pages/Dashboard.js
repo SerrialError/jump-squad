@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
@@ -19,10 +19,11 @@ import fglv from '../images/fglv.png';
 import '../App.css';
 
 function Dashboard() {
-  const [affiliation, setAffiliation] = React.useState(null);
-  const [error, setError] = React.useState(null);
-  const [loading, setLoading] = React.useState(true);
-  const [calendarEvents, setCalendarEvents] = React.useState([]);
+  const [affiliation, setAffiliation] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [calendarEvents, setCalendarEvents] = useState([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const currentDate = new Date();
   const formattedDate = currentDate.toLocaleDateString('en-US', { 
     year: 'numeric', 
@@ -30,6 +31,11 @@ function Dashboard() {
     day: 'numeric' 
   });
   const localizer = momentLocalizer(moment);
+
+  const checkAuthStatus = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setIsAuthenticated(!!user);
+  };
 
   const fetchCalendarEvents = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -88,7 +94,11 @@ function Dashboard() {
       setLoading(false);
     }
 
-    fetchCalendarEvents();
+    checkAuthStatus();
+    if (isAuthenticated) {
+      fetchCalendarEvents();
+    }
+
     fetchEvents();
     fetchAffiliations();
   }, [affiliation]);
@@ -121,7 +131,11 @@ function Dashboard() {
                 <img
                   src={item.image}
                   alt={`Carousel Item ${index}`}
-                  style={{ width: "100%", height: "500px", objectFit: "cover" }}
+                  style={{
+                    width: "100%",
+                    height: "500px",
+                    objectFit: "cover",
+                  }}
                 />
                 <Typography variant="body1" align="center" gutterBottom>
                   {item.description}
@@ -130,72 +144,91 @@ function Dashboard() {
             ))}
           </Carousel>
         </div>
-        <Typography variant="h3" component="h2" marginTop="75px">
-          Schedule
-        </Typography>
-        <Paper
-          style={{
-            display: "flex",
-            height: "43vh",
-            width: "80%",
-            justifyContent: "center",
-            padding: "20px",
-            backgroundColor: "rgb(255, 255, 255)",
-            borderRadius: "5px",
-            marginTop: "15px",
-          }}
-        >
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <div style={{ height: 500, marginBottom: "25px" }}>
-                <Calendar
-                  localizer={localizer}
-                  events={calendarEvents}
-                  startAccessor="start"
-                  endAccessor="end"
-                  style={{ height: "100%" }}
-                  views={['month', 'week', 'agenda']}
-                />
-              </div>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography
-                variant="h4"
-                component="h2"
-                align="center"
-                gutterBottom
-              >
-                Your Volunteer Schedule
-              </Typography>
-              {calendarEvents.length > 0 ? (
-                <Grid container spacing={2}>
-                  {calendarEvents.map((event, index) => (
-                    <Grid item xs={12} key={index}>
-                      <Card className="card">
-                        <CardContent>
-                          <Typography gutterBottom variant="h5" component="div">
-                            {event.title}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Date: {event.start.toLocaleDateString()}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Location: {event.location || "Not specified"}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    </Grid>
-                  ))}
+        {isAuthenticated ? (
+          <>
+            <Typography variant="h3" component="h2" marginTop="75px">
+              Schedule
+            </Typography>
+            <Paper
+              style={{
+                display: "flex",
+                height: "43vh",
+                width: "80%",
+                justifyContent: "center",
+                padding: "20px",
+                backgroundColor: "rgb(255, 255, 255)",
+                borderRadius: "5px",
+                marginTop: "15px",
+              }}
+            >
+              <Grid container spacing={3}>
+                <Grid item xs={12} md={6}>
+                  <div style={{ height: 500, marginBottom: "25px" }}>
+                    <Calendar
+                      localizer={localizer}
+                      events={calendarEvents}
+                      startAccessor="start"
+                      endAccessor="end"
+                      style={{ height: "100%" }}
+                      views={["month", "week", "agenda"]}
+                    />
+                  </div>
                 </Grid>
-              ) : (
-                <Typography variant="body1" align="center">
-                  You have no upcoming volunteer events. Check out the
-                  opportunities below!
-                </Typography>
-              )}
-            </Grid>
-          </Grid>
-        </Paper>
+                <Grid item xs={12} md={6}>
+                  <Typography
+                    variant="h4"
+                    component="h2"
+                    align="center"
+                    gutterBottom
+                  >
+                    Your Volunteer Schedule
+                  </Typography>
+                  {calendarEvents.length > 0 ? (
+                    <Grid container spacing={2}>
+                      {calendarEvents.map((event, index) => (
+                        <Grid item xs={12} key={index}>
+                          <Card className="card">
+                            <CardContent>
+                              <Typography
+                                gutterBottom
+                                variant="h5"
+                                component="div"
+                              >
+                                {event.title}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                Date: {event.start.toLocaleDateString()}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                Location: {event.location || "Not specified"}
+                              </Typography>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  ) : (
+                    <Typography variant="body1" align="center">
+                      You have no upcoming volunteer events. Check out the
+                      opportunities below!
+                    </Typography>
+                  )}
+                </Grid>
+              </Grid>
+            </Paper>
+          </>
+        ) : (
+          <Typography variant="h5" component="h2" marginTop="75px">
+            Please sign in to view your schedule.
+          </Typography>
+        )}
+
         <div style={{ marginTop: "25px" }}>
           <Typography variant="h4" component="h2" gutterBottom>
             Featured Opportunities for {formattedDate}

@@ -81,7 +81,6 @@ const LeaderboardAndStatistics = () => {
           setData([]);
       }
 
-
         const { data: formData, error: formError } = await supabase
           .from('Statistics')
           .select('form_url')
