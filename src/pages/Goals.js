@@ -120,18 +120,42 @@ function Goals() {
 
   const handleDeleteGoal = async (index) => {
     const goalToDelete = goals[index];
-    const { error } = await supabase
+    
+    // First, check if the goal exists in the database
+    const { data, error: fetchError } = await supabase
+      .from('goals')
+      .select('id')
+      .eq('name', goalToDelete.name)
+      .eq('user_id', id)
+      .single();
+  
+    if (fetchError) {
+      console.error('Error fetching goal:', fetchError);
+      alert('Error verifying goal. Please try again.');
+      return;
+    }
+  
+    if (!data) {
+      alert('Goal not found in the database.');
+      return;
+    }
+  
+    // If the goal exists, proceed with deletion
+    const { error: deleteError } = await supabase
       .from('goals')
       .delete()
-      .eq('id', goalToDelete.id);
+      .eq('id', data.id);
   
-    if (error) {
-      console.error('Error deleting goal:', error);
+    if (deleteError) {
+      console.error('Error deleting goal:', deleteError);
+      alert('Failed to delete goal. Please try again.');
     } else {
-      const updatedGoals = goals.filter(goal => goal.id !== goalToDelete.id);
+      const updatedGoals = goals.filter(goal => goal.id !== data.id);
       setGoals(updatedGoals);
-      setAnchorEl(null);
+      alert('Goal deleted successfully.');
     }
+  
+    setAnchorEl(null);
   };
   
 

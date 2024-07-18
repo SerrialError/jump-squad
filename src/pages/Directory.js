@@ -7,6 +7,8 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { Card, CardContent, Grid } from '@mui/material';
 import { Modal, Button } from '@mui/material';
+import Link from '@mui/material/Link';
+import CardMedia from '@mui/material/CardMedia';
 import Popover from "@mui/material/Popover";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -14,12 +16,12 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import GoogleMapReact from "google-map-react";
 import supabase from '../components/Supabase';
-import noimage from '../images/no-image.png';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import AddIcon from '@mui/icons-material/Add';
 import CheckIcon from '@mui/icons-material/Check';
+import { opportunities } from '../components/opportunities';
 
 const Directory = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -56,71 +58,6 @@ const Directory = () => {
       });
     }
   };
-
-  const opportunities = [
-    {
-      id: 1,
-      name: 'Opportunity Village Thrift Store',
-      organization: 'Opportunity Village',
-      description: 'Join us at our thrift store volunteers assist with sorting, placing, organizing, and moving donations.',
-      date: new Date('2024-07-13:00:00'),
-      location: 'Downtown Las Vegas',
-      latitude: '36.16886114726847',
-      longitude: '-115.2072297310761',
-      contact: 'https://www.opportunityvillage.org/thrift-store',
-      image: noimage,
-    },
-    {
-      id: 2,
-      name: 'Project 150',
-      organization: 'Homeless Kids',
-      description: 'Project 150 started in December 2011, when we learned that the Clark County School District has an overwhelming number of homeless teenagers attending school.',
-      date: new Date('2024-01-01T00:00:00'),
-      location: 'Downtown Las Vegas',
-      contact: 'https://www.opportunityvillage.org/thrift-store',
-      image: noimage,
-    },
-    {
-      id: 3,
-      name: 'Las Vegas Rescue Mission',
-      organization: 'Local Food Organization',
-      description: 'Founded in 1970, the Las Vegas Rescue Mission (LVRM) started with a small storefront building that included the chapel, kitchen and a shelter that could house a few men.',
-      date: new Date('2024-01-01T00:00:00'),
-      location: 'East Las Vegas',
-      contact: 'https://www.opportunityvillage.org/thrift-store',
-      image: noimage,
-    },
-    {
-      id: 4,
-      name: 'Animal Shelter Volunteer',
-      organization: 'Local Animal Shelter',
-      description: 'Help care for and socialize with the animals at the shelter.',
-      date: new Date('2024-01-01T00:00:00'),
-      location: 'North Las Vegas',
-      contact: 'https://www.opportunityvillage.org/thrift-store',
-      image: noimage,
-    },
-    {
-      id: 5,
-      name: 'Goodie Two Shoes Foundation',
-      organization: 'Feet Organization',
-      description: 'Our programming is based on the premise that we do not just provide a child with a new pair of shoes. We measure their feet on-site to ensure proper fit.',
-      date: new Date('2024-01-01T00:00:00'),
-      location: 'West Las Vegas',
-      contact: 'https://www.opportunityvillage.org/thrift-store',
-      image: noimage,
-    },
-    {
-      id: 6,
-      name: 'Test Foundation',
-      organization: 'Hello organization',
-      description: 'This is a test to make sure the grid height works. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-      date: new Date('2024-01-01T00:00:00'),
-      location: 'Las Vegas',
-      contact: 'https://www.opportunityvillage.org/thrift-store',
-      image: noimage,
-    }
-  ];
 
   const toggleFavorite = (opportunityId) => {
     setFavorites(prevFavorites => {
@@ -310,9 +247,36 @@ const Directory = () => {
                     onClick={() => handleOpenModal(opportunity)}
                   >
                     <CardContent>
-                      <Typography variant="h5" component="h2">
-                        {opportunity.name}
-                      </Typography>
+                    <Grid container spacing={2} alignItems="center">
+                      <Grid item xs={8}>
+                        <Typography
+                          gutterBottom
+                          variant="h5"
+                          component="div"
+                          align="center"
+                        >
+                          <Link
+                            href={opportunity.contact}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            color="textPrimary"
+                            underline="hover"
+                            className="App-Link"
+                          >
+                            {opportunity.name}
+                          </Link>
+                        </Typography>
+                      </Grid>
+                      <Grid item xs={4}>
+                        <CardMedia
+                          className="img-dashboard-table"
+                          component="img"
+                          height="60"
+                          image={opportunity.image}
+                          alt={opportunity.name}
+                        />
+                      </Grid>
+                    </Grid>
                       <Typography color="textSecondary">
                         {opportunity.organization}
                       </Typography>

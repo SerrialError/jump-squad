@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
-import { Grid, Paper } from '@mui/material';
+import { Grid, Paper, Button } from '@mui/material';
 import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import Divider from '@mui/material/Divider';
@@ -11,12 +11,16 @@ import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import supabase from '../components/Supabase';
+import '../App.css';
+import { opportunities, featuredOpportunityIds } from '../components/opportunities';
+import fglv from '../images/fglv.png';
 import village from '../images/opportunity-village.png';
 import project150 from '../images/project150.png';
 import lvrm from '../images/lvrm.png';
-import goodieshoes from '../images/goodie-two-shoes.png';
-import fglv from '../images/fglv.png';
-import '../App.css';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import AddIcon from '@mui/icons-material/Add';
+import CheckIcon from '@mui/icons-material/Check';
 
 function Dashboard() {
   const [affiliation, setAffiliation] = useState(null);
@@ -31,6 +35,10 @@ function Dashboard() {
     day: 'numeric' 
   });
   const localizer = momentLocalizer(moment);
+  const [favorites, setFavorites] = useState(() => {
+    const savedFavorites = localStorage.getItem('favorites');
+    return savedFavorites ? JSON.parse(savedFavorites) : [];
+  });
 
   const checkAuthStatus = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -56,6 +64,55 @@ function Dashboard() {
           // maybe add feature to set times that you will attend the opportunity?
         })));
       }
+    }
+  };
+
+  const toggleFavorite = (opportunityId) => {
+    setFavorites(prevFavorites => {
+      const newFavorites = prevFavorites.includes(opportunityId)
+        ? prevFavorites.filter(id => id !== opportunityId)
+        : [...prevFavorites, opportunityId];
+      
+      localStorage.setItem('favorites', JSON.stringify(newFavorites));
+      return newFavorites;
+
+      // this only saves the favorites to local storage it does not save to the actual database
+    });
+  }; 
+
+  const addToCalendar = async (opportunity) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      if (calendarEvents.includes(opportunity.name)) {
+        const { error } = await supabase
+          .from('directory_events')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('name', opportunity.name);
+        if (error) {
+          console.error('Error removing event from calendar:', error);
+        } else {
+          setCalendarEvents(prev => prev.filter(name => name !== opportunity.name));
+          alert('Event removed from calendar!');
+        }
+      } else {
+        const { error } = await supabase
+          .from('directory_events')
+          .insert({
+            user_id: user.id,
+            name: opportunity.name,
+            date: opportunity.date,
+            location: opportunity.location
+          });
+        if (error) {
+          console.error('Error adding event to calendar:', error);
+        } else {
+          setCalendarEvents(prev => [...prev, opportunity.name]);
+          alert('Event added to calendar!');
+        }
+      }
+    } else {
+      alert('Please sign in to manage your calendar events.');
     }
   };
 
@@ -117,6 +174,10 @@ function Dashboard() {
       description: 'Image 3 description',
     },
   ];
+
+  const featuredOpportunities = opportunities.filter(opportunity => 
+    featuredOpportunityIds.includes(opportunity.id)
+  );
 
   return (
     <div className="App">
@@ -234,39 +295,19 @@ function Dashboard() {
             Featured Opportunities for {formattedDate}
           </Typography>
           <Grid container spacing={3} justifyContent="center">
-            {[
-              {
-                name: "Opportunity Village Thrift Store",
-                link: "https://app.betterimpact.com/PublicEnterprise/EnterpriseActivity?enterpriseGuid=e47c0801-34d2-4710-8067-a87c71c30c29&activityGuid=2fced57d-0970-469a-96bc-d859d2bb886c&searchUrl=https%253a%252f%252fapp.betterimpact.com%252fPublicEnterprise%252fEnterpriseSearch%253fEnterpriseGuid%253de47c0801-34d2-4710-8067-a87c71c30c29%2526SearchType%253dOrganization%2526SearchId%253d22981",
-                description:
-                  "Taken from the Opportunity Village website. Join us at our thrift store volunteers assist with sorting, placing, organizing, and moving donations. In addition, special projects and events held at the store are posted as they are scheduled.",
-                image: village,
-              },
-              {
-                name: "Project 150",
-                link: "https://www.project150.org/volunteer-with-us",
-                description:
-                  "Project 150 started in December 2011, when we learned that the Clark County School District has an overwhelming number of homeless teenagers attending school. The issue was highlighted in a local TV news report that focused on 150 homeless students attending Rancho High School. The shock over this hidden reality for over 7,500 students in the Las Vegas Valley created a buzz among a network of friends and business colleagues.",
-                image: project150,
-              },
-              {
-                name: "Las Vegas Rescue Mission",
-                link: "https://vegasrescue.org/volunteer/",
-                description:
-                  "Founded in 1970, the Las Vegas Rescue Mission (LVRM) started with a small storefront building that included the chapel, kitchen and a shelter that could house a few men. Today, LVRM campus takes up two city blocks in downtown Las Vegas, helping hundreds of men, women and their children daily, and provides approximately 30,000 meals each month.",
-                image: lvrm,
-              },
-              {
-                name: "Goodie Two Shoes Foundation",
-                link: "https://goodietwoshoes.org/volunteering/",
-                description:
-                  "Our programming is based on the premise that we do not just provide a child with a new pair of shoes. We measure their feet on-site to ensure proper fit. We pair them one-on-one with a community volunteer, whom takes a special interest and walks them through the process. We make them the center of attention, and we EMPOWER them with choice; by giving them the opportunity to select any pair of properly fitting shoes they choose from our large inventory of high-quality athletic shoes, just like the ones their friends at school are wearing.",
-                image: goodieshoes,
-              },
-            ].map((item, index) => (
+            {featuredOpportunities.map((item, index) => (
               <Grid item xs={12} sm={6} md={3} key={index}>
-                <Card className="card">
-                  <CardContent>
+                <Card
+                    sx={{
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      cursor: "pointer",
+                      position: "relative",
+                    }}
+                  >
+                    <CardContent>
                     <Grid container spacing={2} alignItems="center">
                       <Grid item xs={8}>
                         <Typography
@@ -276,7 +317,7 @@ function Dashboard() {
                           align="center"
                         >
                           <Link
-                            href={item.link}
+                            href={item.contact}
                             target="_blank"
                             rel="noopener noreferrer"
                             color="textPrimary"
@@ -297,17 +338,49 @@ function Dashboard() {
                         />
                       </Grid>
                     </Grid>
-                    <Typography
-                      color="textSecondary"
-                      className="card-content"
-                      variant="body2"
-                      component="p"
-                    >
-                      {item.description}
-                    </Typography>
-                  </CardContent>
-                  <Divider />
-                </Card>
+                      <Typography color="textSecondary">
+                        {item.organization}
+                      </Typography>
+                      <Typography variant="body2" component="p">
+                        {item.description}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        Date: {item.date.toLocaleDateString()}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        Location: {item.location}
+                      </Typography>
+                      <Typography variant="body2" color="textSecondary">
+                        Contact: {item.contact}
+                      </Typography>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(item.id);
+                        }}
+                        sx={{ position: "absolute", top: 5, right: 5 }}
+                      >
+                        {favorites.includes(item.id) ? (
+                          <FavoriteIcon color="error" />
+                        ) : (
+                          <FavoriteBorderIcon />
+                        )}
+                      </Button>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          addToCalendar(item);
+                        }}
+                        sx={{ position: "absolute", top: 5, right: 40 }}
+                      >
+                        {calendarEvents.includes(item.name) ? (
+                          <CheckIcon />
+                        ) : (
+                          <AddIcon />
+                        )}
+                      </Button>
+                    </CardContent>
+                  </Card>
               </Grid>
             ))}
           </Grid>
@@ -321,7 +394,7 @@ function Dashboard() {
                 align="center"
                 gutterBottom
               >
-                Events with {affiliation}
+                Opportunities with {affiliation}
               </Typography>
               <Grid container spacing={3} justifyContent="center">
                 {[
