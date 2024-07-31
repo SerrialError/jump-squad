@@ -30,7 +30,7 @@ function Goals() {
   const [selectedGoalIndex, setSelectedGoalIndex] = useState(null);
   const [openLogHoursDialog, setOpenLogHoursDialog] = useState(false);
   const [loggedHours, setLoggedHours] = useState("");
-  const [id, setUserId] = useState(null);
+  const [userId, setUserId] = useState(null);
 
   const getCurrentDate = () => {
     const today = new Date();
@@ -42,22 +42,8 @@ function Goals() {
 
   const currentDate = getCurrentDate();
 
-  const fetchGoals = async (userId) => {
-    const { data, error } = await supabase
-      .from("goals")
-      .select("*")
-      .eq("user_id", userId);
-  
-    if (error) {
-      console.error("Error fetching goals:", error);
-    } else {
-      setGoals(data);
-    }
-    setLoading(false);
-  };
-  
   useEffect(() => {
-    async function checkAuth() {
+    async function fetchGoals() {
       const { data: { user }, error } = await supabase.auth.getUser();
       if (error || !user) {
         setError('Please sign in to create Goals');
@@ -65,10 +51,21 @@ function Goals() {
       } else {
         setIsAuthenticated(true);
         setUserId(user.id);
-        fetchGoals(user.id);
+
+        setLoading(false);
+        const { data, error } = await supabase
+          .from("goals")
+          .select("*")
+          .eq("id", user.id);
+
+        if (error) {
+          console.error("Error fetching goals:", error);
+        } else {
+          setGoals(data);
+        }
       }
     }
-    checkAuth();
+    fetchGoals();
   }, []);
 
   const handleSubmit = async (event) => {
@@ -80,7 +77,7 @@ function Goals() {
       target_hours: targetHours,
       due_date: dueDate,
       logged_hours: 0,
-      user_id: id,
+      id: userId
     };
   
     if (new Date(dueDate) < new Date(currentDate)) {
@@ -119,43 +116,17 @@ function Goals() {
   };
 
   const handleDeleteGoal = async (index) => {
-    const goalToDelete = goals[index];
-    
-    // First, check if the goal exists in the database
-    const { data, error: fetchError } = await supabase
-      .from('goals')
-      .select('id')
-      .eq('name', goalToDelete.name)
-      .eq('user_id', id)
-      .single();
+    const goalId = goals[index].id;
+    const { error } = await supabase.from('goals').delete().eq('id', goalId);
   
-    if (fetchError) {
-      console.error('Error fetching goal:', fetchError);
-      alert('Error verifying goal. Please try again.');
-      return;
-    }
-  
-    if (!data) {
-      alert('Goal not found in the database.');
-      return;
-    }
-  
-    // If the goal exists, proceed with deletion
-    const { error: deleteError } = await supabase
-      .from('goals')
-      .delete()
-      .eq('id', data.id);
-  
-    if (deleteError) {
-      console.error('Error deleting goal:', deleteError);
-      alert('Failed to delete goal. Please try again.');
+    if (error) {
+      console.error('Error deleting goal:', error);
     } else {
-      const updatedGoals = goals.filter(goal => goal.id !== data.id);
+      const updatedGoals = [...goals];
+      updatedGoals.splice(index, 1);
       setGoals(updatedGoals);
-      alert('Goal deleted successfully.');
+      setAnchorEl(null);
     }
-  
-    setAnchorEl(null);
   };
   
 
@@ -311,7 +282,7 @@ function Goals() {
                 </Box>
                 <Box sx={{ mt: 4 }}>
                   <Typography variant="h6" gutterBottom>
-                    Your Goals (delete does not work)
+                    Your Goals
                   </Typography>
                   {goals.length === 0 ? (
                     <Typography variant="body1">No goals currently</Typography>

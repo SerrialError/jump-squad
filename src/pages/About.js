@@ -17,7 +17,7 @@ function About() {
         <h1>About Us</h1>
         <h2>Welcome to Jump Squad!</h2>
         <p>
-          Jump Squad is a dynamic and passionate community service organization located in the vibrant city of Las Vegas, Nevada. Our mission is to make a positive impact on our community by harnessing the energy, creativity, and dedication of our youth volunteers.
+          Jump Squad is a dynamic and passionate community service network located in the vibrant city of Las Vegas, Nevada. Our mission is to make a positive impact on our community by harnessing the energy, creativity, and dedication of our youth volunteers.
         </p>
 
         <h2>Who We Are</h2>
