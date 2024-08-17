@@ -59,17 +59,51 @@ const Directory = () => {
     }
   };
 
-  const toggleFavorite = (opportunityId) => {
-    setFavorites(prevFavorites => {
-      const newFavorites = prevFavorites.includes(opportunityId)
-        ? prevFavorites.filter(id => id !== opportunityId)
-        : [...prevFavorites, opportunityId];
-      
-      localStorage.setItem('favorites', JSON.stringify(newFavorites));
-      return newFavorites;
+  const fetchFavorites = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data, error } = await supabase
+        .from('favorites')
+        .select('name')
+        .eq('user_id', user.id);
+      if (error) {
+        console.error('Error fetching favorites:', error);
+      } else {
+        setFavorites(data.map(favorite => favorite.opportunity.name));
+      }
+    }
+  };
 
-      // this only saves the favorites to local storage it does not save to the actual database
-    });
+  const toggleFavorite = async (opportunity) => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      if (favorites.includes(opportunity.name)) {
+        const { error } = await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('name', opportunity.name);
+        if (error) {
+          console.error('Error removing favorite:', error);
+        } else {
+          setFavorites(prevFavorites => prevFavorites.filter(id => id !== opportunity.name));
+        }
+      } else {
+        const { error } = await supabase
+          .from('favorites')
+          .insert({ 
+            user_id: user.id, 
+            name: opportunity.name
+           });
+        if (error) {
+          console.error('Error adding favorite:', error);
+        } else {
+          setFavorites(prevFavorites => [...prevFavorites, opportunity.name]);
+        }
+      }
+    } else {
+      alert('Please sign in to manage your favorites.');
+    }
   }; 
 
   const addToCalendar = async (opportunity) => {
@@ -152,6 +186,7 @@ const Directory = () => {
 
   useEffect(() => {
     fetchCalendarEvents();
+    fetchFavorites();
   }, []);
 
   return (
