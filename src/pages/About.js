@@ -25,27 +25,11 @@ function About() {
           Jump Squad is comprised of enthusiastic young individuals who are eager to give back to their community. Our volunteers come from diverse backgrounds, but they share a common goal: to create meaningful change and improve the lives of those around them.
         </p>
 
-        <h2>Our Mission</h2>
-        <p>
-          At Jump Squad, we believe in the power of community and the importance of service. Our mission is to:
-        </p>
-        <ul>
-          <li>
-            <p>
-              Empower Youth: We provide young people with opportunities to develop leadership skills, gain valuable experiences, and become active citizens.
-            </p>
-          </li>
-          <li>
-            <p>
-              Serve the Community: Through various service projects and initiatives, we aim to address the needs of our community, from helping the less fortunate to promoting environmental sustainability.
-            </p>
-          </li>
-          <li>
-            <p>
-              Foster Unity: We strive to bring people together, building a stronger, more connected community in Las Vegas.
-            </p>
-          </li>
-        </ul>
+        <h2>Mission Statement</h2>
+        <p> Jump Squad is dedicated to uniting the Las Vegas community through the love and compassion that Christ teaches us. Our mission is to foster connections among neighbors, local businesses, schools, and churches, creating a network of support that reflects the Christian values of kindness, generosity, and service. By organizing fundraisers, we aim not only to raise money for important causes but also to spread awareness and encourage active participation in building a better community.</p>
+	<p>At the heart of Jump Squad is a commitment to living out our faith by giving back. We partner with local charities and organizations that align with our mission to serve others, ensuring that the funds we raise are used to support those in need, uplift families, and strengthen the bonds of our community. We believe in the power of prayer, fellowship, and the collective efforts of our community members to make a lasting difference.</p>
+	<p>Service is a core aspect of our faith, and we strive to provide meaningful opportunities for volunteerism that allow individuals to live out their calling to serve others. Whether it’s through organizing events, participating in local service projects, or offering a helping hand to those in need, we are committed to being the hands and feet of Christ in our community.</p>
+	<p>Our mission is guided by the Christian virtues of love, hope, and faith. We believe that when we come together in the spirit of Christ, we can achieve great things and make a profound impact on the lives of others. Jump Squad is here to inspire, support, and lead our community in living out these values, creating a Las Vegas where everyone is cared for, supported, and empowered to thrive.</p>
 
         <h2>What We Do</h2>
         <p>
