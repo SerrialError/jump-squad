@@ -13,6 +13,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import supabase from '../components/Supabase';
 import '../App.css';
 import { opportunities, featuredOpportunityIds } from '../components/opportunities';
+import { fullGospel } from '../components/affiliation-opportunities';
 import fglv from '../images/fglv.png';
 import village from '../images/opportunity-village.png';
 import project150 from '../images/project150.png';
@@ -29,10 +30,10 @@ function Dashboard() {
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const currentDate = new Date();
-  const formattedDate = currentDate.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  const formattedDate = currentDate.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
   const localizer = momentLocalizer(moment);
   const [favorites, setFavorites] = useState(() => {
@@ -99,8 +100,8 @@ function Dashboard() {
       } else {
         const { error } = await supabase
           .from('favorites')
-          .insert({ 
-            user_id: user.id, 
+          .insert({
+            user_id: user.id,
             name: opportunity.name
            });
         if (error) {
@@ -112,7 +113,7 @@ function Dashboard() {
     } else {
       alert('Please sign in to manage your favorites.');
     }
-  };  
+  };
 
   const addToCalendar = async (opportunity) => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -210,7 +211,7 @@ function Dashboard() {
     },
   ];
 
-  const featuredOpportunities = opportunities.filter(opportunity => 
+  const featuredOpportunities = opportunities.filter(opportunity =>
     featuredOpportunityIds.includes(opportunity.id)
   );
 
@@ -432,16 +433,7 @@ function Dashboard() {
                 Opportunities with {affiliation}
               </Typography>
               <Grid container spacing={3} justifyContent="center">
-                {[
-                  {
-                    name: "Fireworks Displays",
-                    link: "https://fglvchurch.com",
-                    description:
-                      "Firework displays all day at 9415 W Tropicana Ave, Las Vegas, NV 89147.",
-                    image: fglv,
-                  },
-                  // we probably have to move this in some database so it's not hardcoded and can be changed easily
-                ].map((item, index) => (
+                {fullGospel.map((item, index) => (
                   <Grid item xs={12} sm={6} md={3} key={index}>
                     <Card className="card">
                       <CardContent>
