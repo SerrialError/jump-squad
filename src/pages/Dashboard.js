@@ -76,7 +76,7 @@ function Dashboard() {
         .select('name')
         .eq('user_id', user.id);
       if (error) {
-        console.error('Error fetching favorites:', error);
+        console.error('Error adding favorites:', error);
       } else {
         setFavorites(data.map(favorite => favorite.opportunity.name));
       }
@@ -94,6 +94,7 @@ function Dashboard() {
           .eq('name', opportunity.name);
         if (error) {
           console.error('Error removing favorite:', error);
+          alert('Failed to remove opportunity from favorites. Please try again.');
         } else {
           setFavorites(prevFavorites => prevFavorites.filter(id => id !== opportunity.name));
         }
@@ -106,6 +107,7 @@ function Dashboard() {
            });
         if (error) {
           console.error('Error adding favorite:', error);
+          alert('Failed to add opportunity to favorites. Please try again.');
         } else {
           setFavorites(prevFavorites => [...prevFavorites, opportunity.name]);
         }
@@ -126,6 +128,7 @@ function Dashboard() {
           .eq('name', opportunity.name);
         if (error) {
           console.error('Error removing event from calendar:', error);
+          alert('Failed to remove opportunity from calendar. Please try again.');
         } else {
           setCalendarEvents(prev => prev.filter(name => name !== opportunity.name));
           alert('Event removed from calendar!');
@@ -141,6 +144,7 @@ function Dashboard() {
           });
         if (error) {
           console.error('Error adding event to calendar:', error);
+          alert('Failed to add opportunity to calendar. Please try again.');
         } else {
           setCalendarEvents(prev => [...prev, opportunity.name]);
           alert('Event added to calendar!');
