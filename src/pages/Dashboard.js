@@ -29,16 +29,16 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [calendarEvents, setCalendarEvents] = useState([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [favorites, setFavorites] = useState(() => {
+    const savedFavorites = localStorage.getItem('favorites');
+    return savedFavorites ? JSON.parse(savedFavorites) : [];
+  });
+  const localizer = momentLocalizer(moment);
   const currentDate = new Date();
   const formattedDate = currentDate.toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'
-  });
-  const localizer = momentLocalizer(moment);
-  const [favorites, setFavorites] = useState(() => {
-    const savedFavorites = localStorage.getItem('favorites');
-    return savedFavorites ? JSON.parse(savedFavorites) : [];
   });
 
   const checkAuthStatus = async () => {
@@ -62,7 +62,6 @@ function Dashboard() {
           end: new Date(event.date),
           location: event.location,
           allDay: true,
-          // maybe add feature to set times that you will attend the opportunity?
         })));
       }
     }
@@ -78,7 +77,7 @@ function Dashboard() {
       if (error) {
         console.error('Error adding favorites:', error);
       } else {
-        setFavorites(data.map(favorite => favorite.opportunity.name));
+        setFavorites(data.map(favorite => favorite.name));
       }
     }
   };
@@ -96,7 +95,7 @@ function Dashboard() {
           console.error('Error removing favorite:', error);
           alert('Failed to remove opportunity from favorites. Please try again.');
         } else {
-          setFavorites(prevFavorites => prevFavorites.filter(id => id !== opportunity.name));
+          setFavorites(prevFavorites => prevFavorites.filter(name => name !== opportunity.name));
         }
       } else {
         const { error } = await supabase
@@ -120,7 +119,7 @@ function Dashboard() {
   const addToCalendar = async (opportunity) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
-      if (calendarEvents.includes(opportunity.name)) {
+      if (calendarEvents.find(event => event.title === opportunity.name)) {
         const { error } = await supabase
           .from('directory_events')
           .delete()
@@ -130,7 +129,7 @@ function Dashboard() {
           console.error('Error removing event from calendar:', error);
           alert('Failed to remove opportunity from calendar. Please try again.');
         } else {
-          setCalendarEvents(prev => prev.filter(name => name !== opportunity.name));
+          setCalendarEvents(prev => prev.filter(event => event.title !== opportunity.name));
           alert('Event removed from calendar!');
         }
       } else {
@@ -146,7 +145,13 @@ function Dashboard() {
           console.error('Error adding event to calendar:', error);
           alert('Failed to add opportunity to calendar. Please try again.');
         } else {
-          setCalendarEvents(prev => [...prev, opportunity.name]);
+          setCalendarEvents(prev => [...prev, {
+            title: opportunity.name,
+            start: new Date(opportunity.date),
+            end: new Date(opportunity.date),
+            location: opportunity.location,
+            allDay: true,
+          }]);
           alert('Event added to calendar!');
         }
       }
@@ -198,7 +203,7 @@ function Dashboard() {
     fetchEvents();
     fetchAffiliations();
     fetchFavorites();
-  }, [affiliation]);
+  }, [affiliation, isAuthenticated]);
 
   const carouselItems = [
     {
@@ -256,241 +261,133 @@ function Dashboard() {
                 height: "43vh",
                 width: "80%",
                 justifyContent: "center",
-                padding: "20px",
-                backgroundColor: "rgb(255, 255, 255)",
-                borderRadius: "5px",
-                marginTop: "15px",
+                margin: "auto",
+                marginTop: "10px",
+                padding: "5px"
               }}
             >
-              <Grid container spacing={3}>
-                <Grid item xs={12} md={6}>
-                  <div style={{ height: 500, marginBottom: "25px" }}>
-                    <Calendar
-                      localizer={localizer}
-                      events={calendarEvents}
-                      startAccessor="start"
-                      endAccessor="end"
-                      style={{ height: "100%" }}
-                      views={["month", "week", "agenda"]}
-                    />
-                  </div>
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <Typography
-                    variant="h4"
-                    component="h2"
-                    align="center"
-                    gutterBottom
-                  >
-                    Your Volunteer Schedule
-                  </Typography>
-                  {calendarEvents.length > 0 ? (
-                    <Grid container spacing={2}>
-                      {calendarEvents.map((event, index) => (
-                        <Grid item xs={12} key={index}>
-                          <Card className="card">
-                            <CardContent>
-                              <Typography
-                                gutterBottom
-                                variant="h5"
-                                component="div"
-                              >
-                                {event.title}
-                              </Typography>
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                              >
-                                Date: {event.start.toLocaleDateString()}
-                              </Typography>
-                              <Typography
-                                variant="body2"
-                                color="text.secondary"
-                              >
-                                Location: {event.location || "Not specified"}
-                              </Typography>
-                            </CardContent>
-                          </Card>
-                        </Grid>
-                      ))}
-                    </Grid>
-                  ) : (
-                    <Typography variant="body1" align="center">
-                      You have no upcoming volunteer events. Check out the
-                      opportunities below!
-                    </Typography>
-                  )}
-                </Grid>
-              </Grid>
+              <Calendar
+                localizer={localizer}
+                events={calendarEvents}
+                startAccessor="start"
+                endAccessor="end"
+                style={{ height: '100%' }}
+              />
             </Paper>
           </>
         ) : (
-          <Typography variant="h5" component="h2" marginTop="75px">
-            Please sign in to view your schedule.
+          <Typography variant="h6" component="h2" marginTop="20px">
+            Please sign in to view your schedule and manage your favorites.
           </Typography>
         )}
-
-        <div style={{ marginTop: "25px" }}>
-          <Typography variant="h4" component="h2" gutterBottom>
-            Featured Opportunities for {formattedDate}
-          </Typography>
-          <Grid container spacing={3} justifyContent="center">
-            {featuredOpportunities.map((item, index) => (
-              <Grid item xs={12} sm={6} md={3} key={index}>
-                <Card
-                    sx={{
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      position: "relative",
-                    }}
-                  >
-                    <CardContent>
-                    <Grid container spacing={2} alignItems="center">
-                      <Grid item xs={8}>
-                        <Typography
-                          gutterBottom
-                          variant="h5"
-                          component="div"
-                          align="center"
-                        >
-                          <Link
-                            href={item.contact}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            color="textPrimary"
-                            underline="hover"
-                            className="App-Link"
-                          >
-                            {item.name}
-                          </Link>
-                        </Typography>
-                      </Grid>
-                      <Grid item xs={4}>
-                        <CardMedia
-                          className="img-dashboard-table"
-                          component="img"
-                          height="60"
-                          image={item.image}
-                          alt={item.name}
-                        />
-                      </Grid>
-                    </Grid>
-                      <Typography color="textSecondary">
-                        {item.organization}
-                      </Typography>
-                      <Typography variant="body2" component="p">
-                        {item.description}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Date: {item.date.toLocaleDateString()}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Location: {item.location}
-                      </Typography>
-                      <Typography variant="body2" color="textSecondary">
-                        Contact: {item.contact}
-                      </Typography>
+        <Typography variant="h3" component="h2" marginTop="75px">
+          Featured Community Service Options
+        </Typography>
+        <Grid container spacing={3} marginTop="20px">
+          {featuredOpportunities.map((opportunity) => (
+            <Grid item xs={12} sm={6} md={4} key={opportunity.id}>
+              <Card>
+                <CardMedia
+                  component="img"
+                  height="140"
+                  image={opportunity.image}
+                  alt={opportunity.name}
+                />
+                <CardContent>
+                  <Typography gutterBottom variant="h5" component="div">
+                    {opportunity.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {opportunity.description}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Date: {new Date(opportunity.date).toLocaleDateString()}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Location: {opportunity.location}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Contact: {opportunity.contact}
+                  </Typography>
+                  {isAuthenticated && (
+                    <div>
                       <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(item.id);
-                        }}
-                        sx={{ position: "absolute", top: 5, right: 5 }}
+                        onClick={() => toggleFavorite(opportunity)}
+                        variant="contained"
+                        startIcon={favorites.includes(opportunity.name) ? <FavoriteIcon /> : <FavoriteBorderIcon />}
                       >
-                        {favorites.includes(item.id) ? (
-                          <FavoriteIcon color="error" />
-                        ) : (
-                          <FavoriteBorderIcon />
-                        )}
+                        {favorites.includes(opportunity.name) ? 'Unfavorite' : 'Favorite'}
                       </Button>
                       <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addToCalendar(item);
-                        }}
-                        sx={{ position: "absolute", top: 5, right: 40 }}
+                        onClick={() => addToCalendar(opportunity)}
+                        variant="contained"
+                        startIcon={<AddIcon />}
                       >
-                        {calendarEvents.includes(item.name) ? (
-                          <CheckIcon />
-                        ) : (
-                          <AddIcon />
-                        )}
+                        Add to Calendar
                       </Button>
-                    </CardContent>
-                  </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </div>
-        <div style={{ marginTop: "25px", width: "100%" }}>
-          {affiliation !== "No Affiliation" && (
-            <>
-              <Typography
-                variant="h4"
-                component="h2"
-                align="center"
-                gutterBottom
-              >
-                Opportunities with {affiliation}
-              </Typography>
-              <Grid container spacing={3} justifyContent="center">
-                {fullGospel.map((item, index) => (
-                  <Grid item xs={12} sm={6} md={3} key={index}>
-                    <Card className="card">
-                      <CardContent>
-                        <Grid container spacing={2} alignItems="center">
-                          <Grid item xs={8}>
-                            <Typography
-                              gutterBottom
-                              variant="h5"
-                              component="div"
-                              align="center"
-                            >
-                              <Link
-                                href={item.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                color="textPrimary"
-                                underline="hover"
-                                className="App-Link"
-                              >
-                                {item.name}
-                              </Link>
-                            </Typography>
-                          </Grid>
-                          <Grid item>
-                            <CardMedia
-                              className="img-dashboard-table"
-                              component="img"
-                              height="60"
-                              image={item.image}
-                              alt={item.name}
-                            />
-                          </Grid>
-                        </Grid>
-                        <Typography
-                          color="textSecondary"
-                          className="card-content"
-                          variant="body2"
-                          component="p"
-                        >
-                          {item.description}
-                        </Typography>
-                      </CardContent>
-                      <Divider />
-                    </Card>
-                  </Grid>
-                ))}
-              </Grid>
-            </>
-          )}
-        </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+        <Typography variant="h3" component="h2" marginTop="75px">
+          Affiliation Community Service Options
+        </Typography>
+        <Grid container spacing={3} marginTop="20px">
+          {fullGospel.map((opportunity) => (
+            <Grid item xs={12} sm={6} md={4} key={opportunity.id}>
+              <Card>
+                <CardMedia
+                  component="img"
+                  height="140"
+                  image={opportunity.image}
+                  alt={opportunity.name}
+                />
+                <CardContent>
+                  <Typography gutterBottom variant="h5" component="div">
+                    {opportunity.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {opportunity.description}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Date: {new Date(opportunity.date).toLocaleDateString()}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Location: {opportunity.location}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Contact: {opportunity.contact}
+                  </Typography>
+                  {isAuthenticated && (
+                    <div>
+                      <Button
+                        onClick={() => toggleFavorite(opportunity)}
+                        variant="contained"
+                        startIcon={favorites.includes(opportunity.name) ? <FavoriteIcon /> : <FavoriteBorderIcon />}
+                      >
+                        {favorites.includes(opportunity.name) ? 'Unfavorite' : 'Favorite'}
+                      </Button>
+                      <Button
+                        onClick={() => addToCalendar(opportunity)}
+                        variant="contained"
+                        startIcon={<AddIcon />}
+                      >
+                        Add to Calendar
+                      </Button>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       </header>
     </div>
   );
 }
 
 export default Dashboard;
+
