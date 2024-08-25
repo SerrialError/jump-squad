@@ -1,5 +1,5 @@
 import '../App.css';
-import React, { useState, Component, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
@@ -14,157 +14,14 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
-import GoogleMapReact from "google-map-react";
 import supabase from '../components/Supabase';
-import FavoriteIcon from '@mui/icons-material/Favorite';
-import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
 import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
-import AddIcon from '@mui/icons-material/Add';
-import CheckIcon from '@mui/icons-material/Check';
 import { opportunities } from '../components/opportunities';
 
 const Directory = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedOpportunity, setSelectedOpportunity] = useState(null);
-  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
   const [filterEl, setFilterEl] = React.useState(null);
-  const [calendarEvents, setCalendarEvents] = useState([]);
-
-  const [favorites, setFavorites] = useState(() => {
-    const savedFavorites = localStorage.getItem('favorites');
-    return savedFavorites ? JSON.parse(savedFavorites) : [];
-  });
-
-  const handleApiLoaded = (map, maps) => {
-    if (selectedOpportunity) {
-      const marker = new maps.Marker({
-        position: {
-          lat: parseFloat(selectedOpportunity.latitude),
-          lng: parseFloat(selectedOpportunity.longitude)
-        },
-        map,
-        title: selectedOpportunity.name
-      });
-
-      const infoWindow = new maps.InfoWindow({
-        content: `<div>
-          <h3>${selectedOpportunity.name}</h3>
-          <h3>${selectedOpportunity.location}</h3>
-        </div>`
-      });
-  
-      marker.addListener('click', () => {
-        infoWindow.open(map, marker);
-      });
-    }
-  };
-
-  const fetchFavorites = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data, error } = await supabase
-        .from('favorites')
-        .select('name')
-        .eq('user_id', user.id);
-      if (error) {
-        console.error('Error fetching favorites:', error);
-      } else {
-        setFavorites(data.map(favorite => favorite.opportunity.name));
-      }
-    }
-  };
-
-  const toggleFavorite = async (opportunity) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      if (favorites.includes(opportunity.name)) {
-        const { error } = await supabase
-          .from('favorites')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('name', opportunity.name);
-        if (error) {
-          console.error('Error removing favorite:', error);
-          alert('Failed to remove opportunity from favorites. Please try again.');
-        } else {
-          setFavorites(prevFavorites => prevFavorites.filter(id => id !== opportunity.name));
-        }
-      } else {
-        const { error } = await supabase
-          .from('favorites')
-          .insert({ 
-            user_id: user.id, 
-            name: opportunity.name
-           });
-        if (error) {
-          console.error('Error adding favorite:', error);
-          alert('Failed to add opportunity to favorites. Please try again.');
-        } else {
-          setFavorites(prevFavorites => [...prevFavorites, opportunity.name]);
-        }
-      }
-    } else {
-      alert('Please sign in to manage your favorites.');
-    }
-  }; 
-
-  const addToCalendar = async (opportunity) => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      if (calendarEvents.includes(opportunity.name)) {
-        const { error } = await supabase
-          .from('directory_events')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('name', opportunity.name);
-        if (error) {
-          console.error('Error removing event from calendar:', error);
-          alert('Failed to remove opportunity from calendar. Please try again.');
-        } else {
-          setCalendarEvents(prev => prev.filter(name => name !== opportunity.name));
-          alert('Event removed from calendar!');
-        }
-      } else {
-        const { error } = await supabase
-          .from('directory_events')
-          .insert({
-            user_id: user.id,
-            name: opportunity.name,
-            date: opportunity.date,
-            location: opportunity.location
-          });
-        if (error) {
-          console.error('Error adding event to calendar:', error);
-          alert('Failed to add opportunity to calendar. Please try again.');
-        } else {
-          setCalendarEvents(prev => [...prev, opportunity.name]);
-          alert('Event added to calendar!');
-        }
-      }
-    } else {
-      alert('Please sign in to manage your calendar events.');
-    }
-  };
-  
-  const fetchCalendarEvents = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data, error } = await supabase
-        .from('directory_events')
-        .select('name')
-        .eq('user_id', user.id);
-      if (error) {
-        console.error('Error fetching calendar events:', error);
-      } else {
-        setCalendarEvents(data.map(event => event.name));
-      }
-    }
-  };
-
-  const filteredOpportunities = opportunities.filter((opportunity) =>
-    opportunity.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-    (!showOnlyFavorites || favorites.includes(opportunity.id))
-  );
 
   const handleOpenModal = (opportunity) => {
     setSelectedOpportunity(opportunity);
@@ -172,7 +29,7 @@ const Directory = () => {
 
   const handleCloseModal = () => {
     setSelectedOpportunity(null);
-  };  
+  };
 
   const handleFilterClick = (e) => {
     setFilterEl(e.currentTarget);
@@ -182,15 +39,12 @@ const Directory = () => {
     setFilterEl(null);
   };
 
-  const handleFavoriteClick = () => {
-    setShowOnlyFavorites(!showOnlyFavorites);
-  };
-
-  const filterPopoverOpen = Boolean(filterEl);
+  const filteredOpportunities = opportunities.filter((opportunity) =>
+    opportunity.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   useEffect(() => {
-    fetchCalendarEvents();
-    fetchFavorites();
+    // You can fetch data here if needed
   }, []);
 
   return (
@@ -198,7 +52,7 @@ const Directory = () => {
       <div className="App">
         <header className="App-header">
           <Typography component="h1" variant="h3" gutterBottom>
-            Directory (delete not working)
+            Directory
           </Typography>
           <Container component="main" maxWidth="xs">
             <CssBaseline />
@@ -244,7 +98,7 @@ const Directory = () => {
                 </Button>
               </Box>
               <Popover
-                open={filterPopoverOpen}
+                open={Boolean(filterEl)}
                 anchorEl={filterEl}
                 onClose={handleFilterClose}
                 anchorOrigin={{
@@ -254,12 +108,8 @@ const Directory = () => {
               >
                 <List disablePadding>
                   <ListItem disablePadding>
-                    <ListItemButton onClick={handleFavoriteClick}>
-                      <ListItemText
-                        primary={
-                          showOnlyFavorites ? "Show All" : "Show Only Favorites"
-                        }
-                      />
+                    <ListItemButton onClick={handleFilterClose}>
+                      <ListItemText primary="Filters" />
                     </ListItemButton>
                   </ListItem>
                 </List>
@@ -286,36 +136,36 @@ const Directory = () => {
                     onClick={() => handleOpenModal(opportunity)}
                   >
                     <CardContent>
-                    <Grid container spacing={2} alignItems="center">
-                      <Grid item xs={8}>
-                        <Typography
-                          gutterBottom
-                          variant="h5"
-                          component="div"
-                          align="center"
-                        >
-                          <Link
-                            href={opportunity.contact}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            color="textPrimary"
-                            underline="hover"
-                            className="App-Link"
+                      <Grid container spacing={2} alignItems="center">
+                        <Grid item xs={8}>
+                          <Typography
+                            gutterBottom
+                            variant="h5"
+                            component="div"
+                            align="center"
                           >
-                            {opportunity.name}
-                          </Link>
-                        </Typography>
+                            <Link
+                              href={opportunity.contact}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              color="textPrimary"
+                              underline="hover"
+                              className="App-Link"
+                            >
+                              {opportunity.name}
+                            </Link>
+                          </Typography>
+                        </Grid>
+                        <Grid item xs={4}>
+                          <CardMedia
+                            className="img-dashboard-table"
+                            component="img"
+                            height="60"
+                            image={opportunity.image}
+                            alt={opportunity.name}
+                          />
+                        </Grid>
                       </Grid>
-                      <Grid item xs={4}>
-                        <CardMedia
-                          className="img-dashboard-table"
-                          component="img"
-                          height="60"
-                          image={opportunity.image}
-                          alt={opportunity.name}
-                        />
-                      </Grid>
-                    </Grid>
                       <Typography color="textSecondary">
                         {opportunity.organization}
                       </Typography>
@@ -331,32 +181,6 @@ const Directory = () => {
                       <Typography variant="body2" color="textSecondary">
                         Contact: {opportunity.contact}
                       </Typography>
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          toggleFavorite(opportunity.id);
-                        }}
-                        sx={{ position: "absolute", top: 5, right: 5 }}
-                      >
-                        {favorites.includes(opportunity.id) ? (
-                          <FavoriteIcon color="error" />
-                        ) : (
-                          <FavoriteBorderIcon />
-                        )}
-                      </Button>
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          addToCalendar(opportunity);
-                        }}
-                        sx={{ position: "absolute", top: 5, right: 40 }}
-                      >
-                        {calendarEvents.includes(opportunity.name) ? (
-                          <CheckIcon />
-                        ) : (
-                          <AddIcon />
-                        )}
-                      </Button>
                     </CardContent>
                   </Card>
                 </Box>
@@ -398,25 +222,11 @@ const Directory = () => {
                   />
                 </Box>
                 <Box sx={{ width: "50%" }}>
-                  <GoogleMapReact
-                    bootstrapURLKeys={{
-                      key: process.env.REACT_APP_GOOGLE_MAPS_API_KEY,
-                    }}
-                    center={{
-                      lat: parseFloat(selectedOpportunity.latitude),
-                      lng: parseFloat(selectedOpportunity.longitude),
-                    }}
-                    defaultZoom={17}
-                    yesIWantToUseGoogleMapApiInternals
-                    onGoogleApiLoaded={({ map, maps }) =>
-                      handleApiLoaded(map, maps)
-                    }
-                  />
+                  <Typography id="modal-description" sx={{ mt: 2 }}>
+                    {selectedOpportunity.description}
+                  </Typography>
                 </Box>
               </Box>
-              <Typography id="modal-description" sx={{ mt: 2 }}>
-                {selectedOpportunity.description}
-              </Typography>
               <Button onClick={handleCloseModal}>Close</Button>
             </>
           )}
@@ -427,3 +237,4 @@ const Directory = () => {
 };
 
 export default Directory;
+

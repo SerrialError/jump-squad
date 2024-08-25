@@ -17,7 +17,7 @@ export const opportunities = [
     latitude: '36.16886114726847',
     longitude: '-115.2072297310761',
     contact: 'https://www.opportunityvillage.org/thrift-store',
-    image: noimage,
+    image: village,
   },
   {
     id: 2,
@@ -27,7 +27,7 @@ export const opportunities = [
     date: new Date('2024-01-01T00:00:00'),
     location: 'Downtown Las Vegas',
     contact: 'https://www.opportunityvillage.org/thrift-store',
-    image: noimage,
+    image: project150,
   },
   {
     id: 3,
@@ -37,7 +37,7 @@ export const opportunities = [
     date: new Date('2024-01-01T00:00:00'),
     location: 'East Las Vegas',
     contact: 'https://www.opportunityvillage.org/thrift-store',
-    image: noimage,
+    image: lvrm,
   },
   {
     id: 4,
@@ -57,16 +57,6 @@ export const opportunities = [
     date: new Date('2024-01-01T00:00:00'),
     location: 'West Las Vegas',
     contact: 'https://www.opportunityvillage.org/thrift-store',
-    image: noimage,
-  },
-  {
-    id: 6,
-    name: 'Test Foundation',
-    organization: 'Hello organization',
-    description: 'This is a test to make sure the grid height works. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
-    date: new Date('2024-01-01T00:00:00'),
-    location: 'Las Vegas',
-    contact: 'https://www.opportunityvillage.org/thrift-store',
-    image: noimage,
+    image: goodieshoes,
   }
 ];
