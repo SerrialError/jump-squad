@@ -27,6 +27,9 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import StatsIcon from "@mui/icons-material/InsertChart";
 import GoalsIcon from "@mui/icons-material/Flag";
 import DirectoryIcon from "@mui/icons-material/Business";
+import PublicProfileIcon from "@mui/icons-material/Person";
+import InfoIcon from '@mui/icons-material/Info';
+import LoginIcon from '@mui/icons-material/Login';
 import Divider from "@mui/material/Divider";
 import Dashboard from "./Dashboard";
 import Statistics from "./Statistics";
@@ -36,6 +39,7 @@ import About from "./About";
 import Signup from "./Signup";
 import Goals from "./Goals";
 import Directory from "./Directory";
+import Profile from "./Profile";
 import supabase from "../components/Supabase";
 import Avatar from "../components/Avatar";
 
@@ -115,7 +119,7 @@ function Navbar() {
       case "/Login":
         return "Account Login";
       case "/Account":
-        return "Account Information Page";
+        return "Account Settings";
       case "/About":
         return "About Us";
       case "/Signup":
@@ -124,6 +128,8 @@ function Navbar() {
         return "Goals";
       case "/Directory":
         return "Directory";
+      case "/Profile":
+        return "Profile";
       default:
         return "Retrieving title failed";
     }
@@ -203,21 +209,29 @@ function Navbar() {
               <ListItemText primary="Directory" />
             </ListItemButton>
           </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton component="a" href="/About">
+              <ListItemIcon>
+                <InfoIcon />
+              </ListItemIcon>
+              <ListItemText primary="About" />
+            </ListItemButton>
+          </ListItem>
         </List>
         <Divider />
         <List>
           <ListItem disablePadding>
-            <ListItemButton component="a" href="/About">
+            <ListItemButton component="a" href="/Profile">
               <ListItemIcon>
-                <MailIcon />
+                <PublicProfileIcon />
               </ListItemIcon>
-              <ListItemText primary="About" />
+              <ListItemText primary="Profile" />
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
             <ListItemButton component="a" href="/Login">
               <ListItemIcon>
-                <MailIcon />
+                <LoginIcon />
               </ListItemIcon>
               <ListItemText primary="Login" />
             </ListItemButton>
@@ -225,7 +239,7 @@ function Navbar() {
           <ListItem disablePadding>
             <ListItemButton component="a" href="/Signup">
               <ListItemIcon>
-                <MailIcon />
+                <LoginIcon />
               </ListItemIcon>
               <ListItemText primary="Signup" />
             </ListItemButton>
@@ -243,6 +257,7 @@ function Navbar() {
           <Route path="/Signup" element={<Signup />} />
           <Route path="/Goals" element={<Goals />} />
           <Route path="/Directory" element={<Directory />} />
+          <Route path="/Profile" element={<Profile />} />
         </Routes>
       </Main>
     </Box>
@@ -256,4 +271,3 @@ export default function Routers() {
     </Router>
   );
 }
-

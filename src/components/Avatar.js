@@ -100,7 +100,7 @@ const AvatarFunc = () => {
           <ListItem disablePadding>
             <ListItemButton onClick={handleAccountClick}>
               {user ? (
-                <ListItemText primary="Account Page" />
+                <ListItemText primary="Account Settings" />
               ) : (
                 <ListItemText primary="Sign In" />
               )}

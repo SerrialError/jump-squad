@@ -112,7 +112,7 @@ function Dashboard() {
         <Typography variant="h3" component="h2" marginTop="75px">
           Featured Community Service Options
         </Typography>
-        <Grid container spacing={3} marginTop="20px">
+        <Grid container spacing={3} marginTop="20px" alignItems='center' justifyContent= 'center'>
           {featuredOpportunities.map((opportunity) => (
             <Grid item xs={12} sm={6} md={4} key={opportunity.id}>
               <Card>
@@ -143,12 +143,12 @@ function Dashboard() {
             </Grid>
           ))}
         </Grid>
-        {affiliation !== "No Affiliation" && (
+        {affiliation == "No Affiliation" && (
           <>
             <Typography variant="h3" component="h2" marginTop="75px">
               {affiliation} Community Service Options
             </Typography>
-            <Grid container spacing={3} marginTop="20px">
+            <Grid container spacing={3} marginTop="20px" alignItems='center' justifyContent= 'center'>
               {fullGospel.map((opportunity) => (
                 <Grid item xs={12} sm={6} md={4} key={opportunity.id}>
                   <Card>

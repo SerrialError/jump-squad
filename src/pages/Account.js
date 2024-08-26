@@ -14,7 +14,7 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 
 const affiliations = [
-  'Full Gospel Las Vegas Church',
+  // 'Full Gospel Las Vegas Church',
   'No Affiliation',
 ];
 

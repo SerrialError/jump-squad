@@ -172,7 +172,7 @@ const LeaderboardAndStatistics = () => {
             justifyContent: "center",
             padding: "20px",
             backgroundColor: "rgb(255, 255, 255, 0.1)",
-            borderRadius: "15px",
+            borderRadius: "10px",
           }}
         >
           <Grid container spacing={2}>
@@ -226,7 +226,6 @@ const LeaderboardAndStatistics = () => {
                   ]}
                   sx={{
                     backgroundColor: "white",
-                    borderRadius: "20px",
                     [`.${axisClasses.root} line`]: {
                       stroke: theme.palette.text.secondary,
                     },
