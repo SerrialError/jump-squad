@@ -332,8 +332,10 @@ function Dashboard() {
             </Grid>
           ))}
         </Grid>
+        {affiliation !== "No Affiliation" && (
+	<>
         <Typography variant="h3" component="h2" marginTop="75px">
-          Affiliation Community Service Options
+          {affiliation} Community Service Options
         </Typography>
         <Grid container spacing={3} marginTop="20px">
           {fullGospel.map((opportunity) => (
@@ -384,6 +386,8 @@ function Dashboard() {
             </Grid>
           ))}
         </Grid>
+        </>
+        )}
       </header>
     </div>
   );
