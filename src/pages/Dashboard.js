@@ -143,7 +143,7 @@ function Dashboard() {
             </Grid>
           ))}
         </Grid>
-        {affiliation == "No Affiliation" && (
+        {affiliation !== "No Affiliation" && (
           <>
             <Typography variant="h3" component="h2" marginTop="75px">
               {affiliation} Community Service Options
