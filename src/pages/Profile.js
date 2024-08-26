@@ -95,7 +95,7 @@ function PublicProfile() {
     <div>
       <header className="App-header">
         <Container>
-          <Box sx={{ mt: 3, display: 'flex', flexDirection: 'row' }}>
+          <Box sx={{ mt: 3, display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
             {profile && (
               <>
                 <Avatar

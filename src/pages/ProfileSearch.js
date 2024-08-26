@@ -62,6 +62,7 @@ function ProfileSearch() {
 
       if (error) {
         console.error('Error fetching search results:', error);
+        alert('Error fetching search results. Please check the username or try again.');
       } else {
         setSearchResults(data);
         // Fetch total hours for the searched username
@@ -80,7 +81,6 @@ function ProfileSearch() {
       }
     }
   }
-
   if (!profile) {
     return (
       <div>
@@ -97,39 +97,50 @@ function ProfileSearch() {
         <Typography component="h1" variant="h3" gutterBottom>
           Profile Search
         </Typography>
-        <Box component="form" onSubmit={handleSearchSubmit} sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <TextField
-            label="Search by Username"
-            variant="outlined"
-            value={searchUsername}
-            onChange={(e) => setSearchUsername(e.target.value)}
-            sx={{ mb: 2 }}
-            InputProps={{
-              style: {
-                backgroundColor: "white",
-              },
-            }}
-          />
-          <Button 
-            type="submit" 
-            variant="contained" 
-            fullWidth
-            sx={{ mt: 2, mb: 2 }}
-          >Search</Button>
-        </Box>
-        {searchResults && (
-          <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Avatar
-              src={searchResults.avatar_url}
-              alt={searchResults.username}
-              sx={{ width: 100, height: 100, mb: 2 }}
+        <><Container component="main" maxWidth="xs">
+          <Box component="form" onSubmit={handleSearchSubmit} sx={{ mt: 2, display: 'flex', flexDirection: 'column'}}>
+            <TextField
+              label="Search by Username"
+              variant="outlined"
+              value={searchUsername}
+              onChange={(e) => setSearchUsername(e.target.value)}
+              sx={{ mb: 2 }}
+              fullWidth
+              InputProps={{
+                style: {
+                  backgroundColor: "white",
+                },
+              }}
             />
-            <Typography variant="h4" gutterBottom>{searchResults.username}</Typography>
-            <Typography variant="body1" gutterBottom>Affiliation: {searchResults.affiliation}</Typography>
-            <Typography variant="body1" gutterBottom>Social Media: {searchResults.social}</Typography>
-            <Typography variant="h6" gutterBottom>Total Volunteering Hours: {searchTotalHours}</Typography>
+            <Button
+              type="submit"
+              variant="contained"
+              fullWidth
+              sx={{ mt: 2, mb: 2 }}
+            >Search</Button>
           </Box>
-        )}
+          {searchResults && (
+            <Container width="xs">
+              <Box sx={{ mt: 3, display: 'flex', flexDirection: 'row',  alignItems: 'center', justifyContent: 'center' }}>
+                {profile && (
+                  <>
+                    <Avatar
+                      src={profile.avatar_url}
+                      alt={profile.username}
+                      sx={{ width: 280, height: 280, mr: 4 }}
+                    />
+                  </>
+                )}
+                <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column' }}>
+                  <Typography variant="h1" gutterBottom>{searchResults.username}</Typography>
+                  <Typography variant="h6" gutterBottom>Affiliation: {searchResults.affiliation}</Typography>
+                  <Typography variant="h6" gutterBottom>Social Media: {searchResults.social}</Typography>
+                  <Typography variant="h6" gutterBottom>Total Volunteering Hours: {searchTotalHours.totalHours}</Typography>
+                </Box>
+              </Box>
+            </Container>
+          )}
+        </Container></>
       </header>
     </div>
   );
