@@ -27,7 +27,6 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import StatsIcon from "@mui/icons-material/InsertChart";
 import GoalsIcon from "@mui/icons-material/Flag";
 import DirectoryIcon from "@mui/icons-material/Business";
-import PublicProfileIcon from "@mui/icons-material/Person";
 import Divider from "@mui/material/Divider";
 import Dashboard from "./Dashboard";
 import Statistics from "./Statistics";
@@ -37,7 +36,6 @@ import About from "./About";
 import Signup from "./Signup";
 import Goals from "./Goals";
 import Directory from "./Directory";
-import PublicProfile from "./PublicProfile";
 import supabase from "../components/Supabase";
 import Avatar from "../components/Avatar";
 
@@ -126,8 +124,6 @@ function Navbar() {
         return "Goals";
       case "/Directory":
         return "Directory";
-      case "/PublicProfile":
-        return "Public Profile";
       default:
         return "Retrieving title failed";
     }
@@ -207,14 +203,6 @@ function Navbar() {
               <ListItemText primary="Directory" />
             </ListItemButton>
           </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component="a" href="/PublicProfile">
-              <ListItemIcon>
-                <PublicProfileIcon />
-              </ListItemIcon>
-              <ListItemText primary="Public Profile" />
-            </ListItemButton>
-          </ListItem>
         </List>
         <Divider />
         <List>
@@ -255,7 +243,6 @@ function Navbar() {
           <Route path="/Signup" element={<Signup />} />
           <Route path="/Goals" element={<Goals />} />
           <Route path="/Directory" element={<Directory />} />
-          <Route path="/PublicProfile" element={<PublicProfile />} />
         </Routes>
       </Main>
     </Box>
