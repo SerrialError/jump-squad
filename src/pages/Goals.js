@@ -28,8 +28,6 @@ function Goals() {
   const [editingGoalIndex, setEditingGoalIndex] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedGoalIndex, setSelectedGoalIndex] = useState(null);
-  const [openLogHoursDialog, setOpenLogHoursDialog] = useState(false);
-  const [loggedHours, setLoggedHours] = useState("");
   const [userId, setUserId] = useState(null);
 
   const getCurrentDate = () => {
@@ -52,7 +50,7 @@ function Goals() {
         setIsAuthenticated(true);
         setUserId(user.id);
 
-        setLoading(false);
+        // Fetch all goals for the user
         const { data, error } = await supabase
           .from("goals")
           .select("*")
@@ -64,6 +62,7 @@ function Goals() {
           setGoals(data);
         }
       }
+      setLoading(false);
     }
     fetchGoals();
   }, []);
@@ -71,7 +70,7 @@ function Goals() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-  
+
     const newGoal = {
       name: goalName,
       target_hours: targetHours,
@@ -79,24 +78,51 @@ function Goals() {
       logged_hours: 0,
       id: userId
     };
-  
+
     if (new Date(dueDate) < new Date(currentDate)) {
       alert("Due date must be today or a future date.");
       setLoading(false);
       return;
     }
-  
+
     try {
-      const { data, error } = await supabase.from('goals').insert([{ ...newGoal }]);
-  
-      if (error) {
-        console.error('Error inserting goal:', error);
-        alert('Failed to save goal. Please try again.');
-      } else if (data && data.length > 0) {
-        setGoals([...goals, { ...newGoal, id: data[0].id, logged_hours: 0 }]);
-        setGoalName('');
-        setTargetHours('');
-        setDueDate('');
+      if (editingGoalIndex !== null) {
+        // Update existing goal
+        const goalId = goals[editingGoalIndex].id;
+        const { error } = await supabase
+          .from('goals')
+          .update({
+            name: goalName,
+            target_hours: targetHours,
+            due_date: dueDate
+          })
+          .eq('id', goalId);
+
+        if (error) {
+          console.error('Error updating goal:', error);
+          alert('Failed to update goal. Please try again.');
+        } else {
+          const updatedGoals = [...goals];
+          updatedGoals[editingGoalIndex] = { ...newGoal, id: goals[editingGoalIndex].id };
+          setGoals(updatedGoals);
+          setEditingGoalIndex(null);
+          setGoalName('');
+          setTargetHours('');
+          setDueDate('');
+        }
+      } else {
+        // Insert new goal
+        const { data, error } = await supabase.from('goals').insert([{ ...newGoal }]);
+
+        if (error) {
+          console.error('Error inserting goal:', error);
+          alert('Failed to save goal. Please try again.');
+        } else if (data && data.length > 0) {
+          setGoals([...goals, { ...newGoal, id: data[0].id }]);
+          setGoalName('');
+          setTargetHours('');
+          setDueDate('');
+        }
       }
     } catch (error) {
       console.error('Unexpected error:', error);
@@ -116,14 +142,19 @@ function Goals() {
   };
 
   const handleDeleteGoal = async (index) => {
-    const goalId = goals[index].id;
-    const { error } = await supabase.from('goals').delete().eq('id', goalId);
+    const goal = goals[index];
+    const { id, name } = goal;
+    
+    // Perform delete operation
+    const { error } = await supabase
+      .from('goals')
+      .delete()
+      .match({ id, name });
   
     if (error) {
       console.error('Error deleting goal:', error);
     } else {
-      const updatedGoals = [...goals];
-      updatedGoals.splice(index, 1);
+      const updatedGoals = goals.filter((_, i) => i !== index);
       setGoals(updatedGoals);
       setAnchorEl(null);
     }
@@ -137,43 +168,6 @@ function Goals() {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-  };
-
-  const handleOpenLogHoursDialog = (index) => {
-    const goal = goals[index];
-    setLoggedHours(goal.logged_hours);
-    setSelectedGoalIndex(index);
-    setAnchorEl(null);
-    setOpenLogHoursDialog(true);
-  };
-
-  const handleCloseLogHoursDialog = () => {
-    setOpenLogHoursDialog(false);
-    setLoggedHours("");
-  };
-
-  const handleLogHours = async () => {
-    const hours = parseInt(loggedHours);
-    if (hours <= 0) {
-      alert("Please enter a positive number of hours.");
-      return;
-    }
-  
-    const goalId = goals[selectedGoalIndex].id;
-    const { error } = await supabase
-      .from('goals')
-      .update({ logged_hours: goals[selectedGoalIndex].logged_hours + hours })
-      .eq('id', goalId);
-  
-    if (error) {
-      console.error('Error updating logged hours:', error);
-    } else {
-      const updatedGoals = [...goals];
-      updatedGoals[selectedGoalIndex].logged_hours += hours;
-      setGoals(updatedGoals);
-      setOpenLogHoursDialog(false);
-      setLoggedHours('');
-    }
   };
 
   const isGoalOverdue = (goal) => {
@@ -300,18 +294,15 @@ function Goals() {
                               return "rgba(0, 128, 0, 0.2)"; // Green background for completed goals
                             } else if (isOverdue) {
                               return "rgba(255, 0, 0, 0.2)"; // Red background for overdue goals
-                            } else {
-                              return "transparent"; // No background color for active goals
                             }
+                            return "rgba(255, 255, 255, 0.8)"; // Default background
                           })(),
                           padding: 2,
-                          borderRadius: 2,
+                          borderRadius: 1,
                         }}
                       >
                         <Box sx={{ flexGrow: 1 }}>
-                          <Typography variant="body1">
-                            <strong>{goal.name}</strong>
-                          </Typography>
+                          <Typography variant="h6">{goal.name}</Typography>
                           <Typography variant="body2">
                             Target Hours: {goal.target_hours}
                           </Typography>
@@ -319,66 +310,34 @@ function Goals() {
                             Logged Hours: {goal.logged_hours}
                           </Typography>
                           <Typography variant="body2">
-                            Due Date: {goal.due_date || "No due date"}
+                            Due Date: {new Date(goal.due_date).toLocaleDateString()}
+                          </Typography>
+                          <Typography variant="body2">
+                            Progress: {getProgressPercentage(goal)}
                           </Typography>
                         </Box>
-                        <Typography variant="body2" sx={{ ml: 2 }}>
-                          {getProgressPercentage(goal)}
-                        </Typography>
                         <IconButton
-                          aria-label="more"
-                          aria-controls="goal-menu"
+                          aria-controls="simple-menu"
                           aria-haspopup="true"
-                          onClick={(event) => handleMenuOpen(event, index)}
+                          onClick={(e) => handleMenuOpen(e, index)}
                         >
                           <MoreVertIcon />
                         </IconButton>
-                        <Menu
-                          id="goal-menu"
-                          anchorEl={anchorEl}
-                          open={Boolean(anchorEl) && selectedGoalIndex === index}
-                          onClose={handleMenuClose}
-                          MenuListProps={{
-                            "aria-labelledby": "goal-menu",
-                          }}
-                        >
-                          <MenuItem onClick={() => handleOpenLogHoursDialog(index)}>
-                            Log Hours
-                          </MenuItem>
-                          <MenuItem onClick={() => handleEditGoal(index)}>
-                            Edit
-                          </MenuItem>
-                          <MenuItem onClick={() => handleDeleteGoal(index)}>
-                            Delete
-                          </MenuItem>
-                        </Menu>
                       </Box>
                     ))
                   )}
                 </Box>
               </Box>
-            </Container><Dialog open={openLogHoursDialog} onClose={handleCloseLogHoursDialog}>
-                <DialogTitle>Log Hours</DialogTitle>
-                <DialogContent>
-                  <DialogContentText>
-                    Enter the number of hours you want to log for this goal.
-                  </DialogContentText>
-                  <TextField
-                    autoFocus
-                    margin="dense"
-                    id="loggedHours"
-                    label="Logged Hours"
-                    type="number"
-                    fullWidth
-                    value={loggedHours}
-                    onChange={(e) => setLoggedHours(e.target.value)}
-                    inputProps={{ min: 1 }} />
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleCloseLogHoursDialog}>Cancel</Button>
-                  <Button onClick={handleLogHours}>Log Hours</Button>
-                </DialogActions>
-              </Dialog></>
+            </Container>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+          >
+            <MenuItem onClick={() => handleEditGoal(selectedGoalIndex)}>Edit</MenuItem>
+            <MenuItem onClick={() => handleDeleteGoal(selectedGoalIndex)}>Delete</MenuItem>
+          </Menu>
+        </>
         )}
       </header>
     </div>

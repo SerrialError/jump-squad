@@ -57,6 +57,10 @@ const AvatarFunc = () => {
     navigate("/");
   };
 
+  const handleProfileClick = () => {
+    navigate("/Profile");
+  };
+
   const handleAvatarClose = () => {
     setAvatarEl(null);
   };
@@ -97,6 +101,16 @@ const AvatarFunc = () => {
             </ListItemButton>
           </ListItem>
           <Divider />
+          {user && (
+            <>
+              <Divider />
+              <ListItem disablePadding>
+                <ListItemButton onClick={handleProfileClick}>
+                  <ListItemText primary="Profile" />
+                </ListItemButton>
+              </ListItem>
+            </>
+          )}
           <ListItem disablePadding>
             <ListItemButton onClick={handleAccountClick}>
               {user ? (

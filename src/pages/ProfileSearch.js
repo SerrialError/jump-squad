@@ -3,7 +3,7 @@ import supabase from '../components/Supabase';
 import { useParams } from 'react-router-dom';
 import { Typography, Container, Box, Avatar, TextField, Button } from '@mui/material';
 
-function PublicProfile() {
+function ProfileSearch() {
   const [profile, setProfile] = useState(null);
   const [totalHours, setTotalHours] = useState(0);
   const [searchUsername, setSearchUsername] = useState(''); // State for search input
@@ -94,28 +94,45 @@ function PublicProfile() {
   return (
     <div>
       <header className="App-header">
-        <Container>
-          <Box sx={{ mt: 3, display: 'flex', flexDirection: 'row' }}>
-            {profile && (
-              <>
-                <Avatar
-                  src={profile.avatar_url}
-                  alt={profile.username}
-                  sx={{ width: 280, height: 280, mr: 4 }}
-                />
-              </>
-            )}
-            <Box sx={{ mt: 3, display: 'flex', flexDirection: 'column' }}>
-              <Typography variant="h1" gutterBottom>{profile.username}</Typography>
-              <Typography variant="h6" gutterBottom>Affiliation: {profile.affiliation}</Typography>
-              <Typography variant="h6" gutterBottom>Social Media: {profile.social}</Typography>
-              <Typography variant="h6" gutterBottom>Total Volunteering Hours: {totalHours}</Typography>
-            </Box>
+        <Typography component="h1" variant="h3" gutterBottom>
+          Profile Search
+        </Typography>
+        <Box component="form" onSubmit={handleSearchSubmit} sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <TextField
+            label="Search by Username"
+            variant="outlined"
+            value={searchUsername}
+            onChange={(e) => setSearchUsername(e.target.value)}
+            sx={{ mb: 2 }}
+            InputProps={{
+              style: {
+                backgroundColor: "white",
+              },
+            }}
+          />
+          <Button 
+            type="submit" 
+            variant="contained" 
+            fullWidth
+            sx={{ mt: 2, mb: 2 }}
+          >Search</Button>
+        </Box>
+        {searchResults && (
+          <Box sx={{ mt: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            <Avatar
+              src={searchResults.avatar_url}
+              alt={searchResults.username}
+              sx={{ width: 100, height: 100, mb: 2 }}
+            />
+            <Typography variant="h4" gutterBottom>{searchResults.username}</Typography>
+            <Typography variant="body1" gutterBottom>Affiliation: {searchResults.affiliation}</Typography>
+            <Typography variant="body1" gutterBottom>Social Media: {searchResults.social}</Typography>
+            <Typography variant="h6" gutterBottom>Total Volunteering Hours: {searchTotalHours}</Typography>
           </Box>
-        </Container>
+        )}
       </header>
     </div>
   );
 }
 
-export default PublicProfile;
+export default ProfileSearch;

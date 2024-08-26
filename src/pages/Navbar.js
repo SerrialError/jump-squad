@@ -30,6 +30,7 @@ import DirectoryIcon from "@mui/icons-material/Business";
 import PublicProfileIcon from "@mui/icons-material/Person";
 import InfoIcon from '@mui/icons-material/Info';
 import LoginIcon from '@mui/icons-material/Login';
+import SearchIcon from '@mui/icons-material/Search';
 import Divider from "@mui/material/Divider";
 import Dashboard from "./Dashboard";
 import Statistics from "./Statistics";
@@ -42,6 +43,7 @@ import Directory from "./Directory";
 import Profile from "./Profile";
 import supabase from "../components/Supabase";
 import Avatar from "../components/Avatar";
+import ProfileSearch from "./ProfileSearch";
 
 const drawerWidth = 240;
 
@@ -130,6 +132,8 @@ function Navbar() {
         return "Directory";
       case "/Profile":
         return "Profile";
+      case "/ProfileSearch":
+        return "Profile Search";
       default:
         return "Retrieving title failed";
     }
@@ -229,19 +233,11 @@ function Navbar() {
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>
-            <ListItemButton component="a" href="/Login">
+            <ListItemButton component="a" href="/ProfileSearch">
               <ListItemIcon>
-                <LoginIcon />
+                <SearchIcon />
               </ListItemIcon>
-              <ListItemText primary="Login" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton component="a" href="/Signup">
-              <ListItemIcon>
-                <LoginIcon />
-              </ListItemIcon>
-              <ListItemText primary="Signup" />
+              <ListItemText primary="Profile Search" />
             </ListItemButton>
           </ListItem>
         </List>
@@ -258,6 +254,7 @@ function Navbar() {
           <Route path="/Goals" element={<Goals />} />
           <Route path="/Directory" element={<Directory />} />
           <Route path="/Profile" element={<Profile />} />
+          <Route path="/ProfileSearch" element={<ProfileSearch />} />
         </Routes>
       </Main>
     </Box>
