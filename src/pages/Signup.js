@@ -37,8 +37,9 @@ function Signup() {
     setLoading(false);
     if (error) {
       console.error("Error during sign-up:", error);
+      alert("There was an error when signing up. Please try again.");
     } else {
-      console.log("Sign-up data:", data);
+      alert("Sign up confirmed. Please check your email for a confirmation link. If you don't see it within a few minutes, check your junk folder, then try to sign up again.");
     }
   }
 
@@ -51,6 +52,7 @@ function Signup() {
     });
     if (githubError) {
       console.error("Error during GitHub sign-in:", githubError);
+      alert("There was an error when signing up. Please try again.");
     } else {
       console.log("GitHub sign-in data:", githubData);
     }
@@ -65,6 +67,7 @@ function Signup() {
     });
     if (googleError) {
       console.error("Error during Google sign-in:", googleError);
+      alert("There was an error when signing up. Please try again.");
     } else {
       console.log("Google sign-in data:", googleData);
     }
@@ -79,6 +82,7 @@ function Signup() {
     });
     if (microsoftError) {
       console.error("Error during Microsoft sign-in:", microsoftError);
+      alert("There was an error when signing up. Please try again.");
     } else {
       console.log("Microsoft sign-in data:", microsoftData);
     }
@@ -93,6 +97,7 @@ function Signup() {
     });
     if (twitterError) {
       console.error("Error during Twitter sign-in:", twitterError);
+      alert("There was an error when signing up. Please try again.");
     } else {
       console.log("Twitter sign-in data:", twitterData);
     }
