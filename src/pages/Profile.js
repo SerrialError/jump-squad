@@ -85,7 +85,7 @@ function PublicProfile() {
     return (
       <div>
         <header className="App-header">
-          <Typography variant="h3">Loading, please wait...</Typography>
+          <Typography variant="h3">Please Login To View the Profile Page.</Typography>
         </header>
       </div>
     )
