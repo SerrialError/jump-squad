@@ -75,7 +75,7 @@ export default function InsertForm({ url, size, onUpload, onUploadSuccess }) {
           }}
           type="file"
           id="single"
-          accept="image/*"
+          accept=".png,.jpg,.jpeg,.pdf,.doc,.docx"
           onChange={uploadForm}
           disabled={uploading}
         />
