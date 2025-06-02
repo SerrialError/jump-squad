@@ -1,0 +1,17 @@
+{
+  "name": "jump-squad",
+  "version": "1.0.0",
+  "description": "A volunteering app that helps you connect and participate in volunteering across the city of Las Vegas. Includes statistics, tracking, goals, and a directory to help you with volunteering life. Currently in development.",
+  "main": "build.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "serve dist"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "esbuild": "^0.25.5",
+    "serve": "^14.2.4"
+  }
+}

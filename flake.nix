@@ -15,7 +15,6 @@
       in {
         devShells.default = pkgs.mkShell {
           packages = [
-            pkgs.esbuild
             pkgs.nodejs_20 # or another version if needed
           ];
 
